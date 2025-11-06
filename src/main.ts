@@ -32,6 +32,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('health', 'Health check endpoints')
     .addTag('students', 'Student management endpoints')
+    .addTag('teachers', 'Teacher management endpoints')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
