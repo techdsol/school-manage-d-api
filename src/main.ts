@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -12,6 +13,15 @@ async function bootstrap() {
     new FastifyAdapter(),
   );
 
+  // Enable global validation pipes
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+
   // Configure CORS
   app.enableCors();
 
@@ -21,6 +31,7 @@ async function bootstrap() {
     .setDescription('A comprehensive school management system API')
     .setVersion('1.0')
     .addTag('health', 'Health check endpoints')
+    .addTag('students', 'Student management endpoints')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
