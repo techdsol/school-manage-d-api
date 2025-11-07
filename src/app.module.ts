@@ -4,6 +4,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { HealthModule } from './modules/health/health.module';
 import { StudentsModule } from './modules/students/students.module';
 import { TeachersModule } from './modules/teachers/teachers.module';
+import { ClassesModule } from './modules/classes/classes.module';
 import { getDatabaseConfig } from './config/database.config';
 
 @Module({
@@ -19,6 +20,7 @@ import { getDatabaseConfig } from './config/database.config';
     HealthModule,
     StudentsModule,
     TeachersModule,
+    ClassesModule,
   ],
   controllers: [],
   providers: [],
