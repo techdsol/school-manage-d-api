@@ -24,7 +24,7 @@ import { Teacher } from '../entities/teacher.entity';
 @ApiTags('Teachers')
 @Controller('teachers')
 export class TeachersController {
-  constructor(private readonly teachersService: TeachersService) {}
+  constructor(private readonly teachersService: TeachersService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create a new teacher' })

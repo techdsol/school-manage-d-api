@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { HealthModule } from './modules/health/health.module';
-import { StudentsModule } from './modules/students/students.module';
-import { TeachersModule } from './modules/teachers/teachers.module';
+import { HealthModule } from './modules/health';
+import { StudentsModule } from './modules/students';
+import { TeachersModule } from './modules/teachers';
+import { ClassesModule } from './modules/classes';
 import { getDatabaseConfig } from './config/database.config';
 
 @Module({
@@ -19,6 +20,7 @@ import { getDatabaseConfig } from './config/database.config';
     HealthModule,
     StudentsModule,
     TeachersModule,
+    ClassesModule,
   ],
   controllers: [],
   providers: [],
