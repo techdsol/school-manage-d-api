@@ -5,6 +5,8 @@ import { HealthModule } from './modules/health';
 import { StudentsModule } from './modules/students';
 import { TeachersModule } from './modules/teachers';
 import { ClassesModule } from './modules/classes';
+import { SubjectsModule } from './modules/subjects';
+import { AcademicYearsModule } from './modules/academic-years';
 import { getDatabaseConfig } from './config/database.config';
 
 @Module({
@@ -21,6 +23,8 @@ import { getDatabaseConfig } from './config/database.config';
     StudentsModule,
     TeachersModule,
     ClassesModule,
+    SubjectsModule,
+    AcademicYearsModule,
   ],
   controllers: [],
   providers: [],

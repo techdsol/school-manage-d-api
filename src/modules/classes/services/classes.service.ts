@@ -22,21 +22,21 @@ export class ClassesService {
     });
   }
 
-  async findOne(id: string): Promise<Class> {
-    const classEntity = await this.classRepository.findByPk(id);
+  async findOne(code: string): Promise<Class> {
+    const classEntity = await this.classRepository.findByPk(code);
     if (!classEntity) {
-      throw new NotFoundException(`Class with ID ${id} not found`);
+      throw new NotFoundException(`Class with code ${code} not found`);
     }
     return classEntity;
   }
 
-  async update(id: string, updateClassDto: UpdateClassDto): Promise<Class> {
-    const classEntity = await this.findOne(id);
+  async update(code: string, updateClassDto: UpdateClassDto): Promise<Class> {
+    const classEntity = await this.findOne(code);
     return classEntity.update(updateClassDto);
   }
 
-  async remove(id: string): Promise<void> {
-    const classEntity = await this.findOne(id);
+  async remove(code: string): Promise<void> {
+    const classEntity = await this.findOne(code);
     await classEntity.destroy();
   }
 
