@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString } from 'class-validator';
-import { AttendanceStatus } from '../../entities/attendance.entity';
+import { StudentAttendanceStatus } from '../../entities/student-attendance.entity';
 
-export class UpdateAttendanceDto {
-  @ApiProperty({ enum: AttendanceStatus, required: false, description: 'Attendance status' })
+export class UpdateStudentAttendanceDto {
+  @ApiProperty({ enum: StudentAttendanceStatus, required: false, description: 'Attendance status' })
   @IsOptional()
-  @IsEnum(AttendanceStatus)
-  status?: AttendanceStatus;
+  @IsEnum(StudentAttendanceStatus)
+  status?: StudentAttendanceStatus;
 
   @ApiProperty({ required: false, description: 'Check-in time (HH:MM:SS)' })
   @IsOptional()

@@ -2,7 +2,7 @@ import { Column, Model, Table, DataType, PrimaryKey, Default, ForeignKey, Belong
 import { ApiProperty } from '@nestjs/swagger';
 import { Student } from './student.entity';
 import { ClassSection } from '../../classes/entities/class-section.entity';
-import { Attendance } from './attendance.entity';
+import { StudentAttendance } from './student-attendance.entity';
 
 @Table({
   tableName: 'student_assignments',
@@ -54,8 +54,8 @@ export class StudentAssignment extends Model<StudentAssignment> {
   @BelongsTo(() => ClassSection, 'classSectionCode')
   classSection: ClassSection;
 
-  @HasMany(() => Attendance, 'studentAssignmentId')
-  attendances: Attendance[];
+  @HasMany(() => StudentAttendance, 'studentAssignmentId')
+  attendances: StudentAttendance[];
 
   @ApiProperty()
   @Column

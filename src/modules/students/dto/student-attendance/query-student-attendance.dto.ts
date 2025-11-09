@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsEnum, IsDateString, IsUUID, IsString } from 'class-validator';
-import { AttendanceStatus } from '../../entities/attendance.entity';
+import { StudentAttendanceStatus } from '../../entities/student-attendance.entity';
 
-export class QueryAttendanceDto {
+export class QueryStudentAttendanceDto {
   @ApiProperty({ required: false, description: 'Filter by student assignment ID' })
   @IsOptional()
   @IsUUID()
@@ -33,10 +33,10 @@ export class QueryAttendanceDto {
   @IsDateString()
   endDate?: string;
 
-  @ApiProperty({ enum: AttendanceStatus, required: false, description: 'Filter by attendance status' })
+  @ApiProperty({ enum: StudentAttendanceStatus, required: false, description: 'Filter by attendance status' })
   @IsOptional()
-  @IsEnum(AttendanceStatus)
-  status?: AttendanceStatus;
+  @IsEnum(StudentAttendanceStatus)
+  status?: StudentAttendanceStatus;
 
   @ApiProperty({ required: false, description: 'Page number', default: 1 })
   @IsOptional()

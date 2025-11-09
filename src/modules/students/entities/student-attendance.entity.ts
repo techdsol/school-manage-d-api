@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { StudentAssignment } from './student-assignment.entity';
 import { Teacher } from '../../teachers/entities/teacher.entity';
 
-export enum AttendanceStatus {
+export enum StudentAttendanceStatus {
   PRESENT = 'PRESENT',
   ABSENT = 'ABSENT',
   LATE = 'LATE',
@@ -13,7 +13,7 @@ export enum AttendanceStatus {
 }
 
 @Table({
-  tableName: 'attendance',
+  tableName: 'student_attendance',
   timestamps: true,
   indexes: [
     {
@@ -23,15 +23,15 @@ export enum AttendanceStatus {
     },
     {
       fields: ['attendanceDate'],
-      name: 'idx_attendance_date',
+      name: 'idx_student_attendance_date',
     },
     {
       fields: ['status'],
-      name: 'idx_attendance_status',
+      name: 'idx_student_attendance_status',
     },
   ],
 })
-export class Attendance extends Model<Attendance> {
+export class StudentAttendance extends Model<StudentAttendance> {
   @ApiProperty()
   @PrimaryKey
   @Default(DataType.UUIDV4)
@@ -53,12 +53,12 @@ export class Attendance extends Model<Attendance> {
   })
   attendanceDate: Date;
 
-  @ApiProperty({ enum: AttendanceStatus })
+  @ApiProperty({ enum: StudentAttendanceStatus })
   @Column({
-    type: DataType.ENUM(...Object.values(AttendanceStatus)),
+    type: DataType.ENUM(...Object.values(StudentAttendanceStatus)),
     allowNull: false,
   })
-  status: AttendanceStatus;
+  status: StudentAttendanceStatus;
 
   @ApiProperty({ required: false })
   @Column({

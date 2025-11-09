@@ -11,30 +11,30 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
-import { AttendanceService } from '../services/attendance.service';
-import { CreateAttendanceDto } from '../dto/attendance/create-attendance.dto';
-import { UpdateAttendanceDto } from '../dto/attendance/update-attendance.dto';
-import { BulkCreateAttendanceDto } from '../dto/attendance/bulk-create-attendance.dto';
-import { QueryAttendanceDto } from '../dto/attendance/query-attendance.dto';
-import { Attendance } from '../entities/attendance.entity';
+import { StudentAttendanceService } from '../services/student-attendance.service';
+import { CreateStudentAttendanceDto } from '../dto/student-attendance/create-student-attendance.dto';
+import { UpdateStudentAttendanceDto } from '../dto/student-attendance/update-student-attendance.dto';
+import { BulkCreateStudentAttendanceDto } from '../dto/student-attendance/bulk-create-student-attendance.dto';
+import { QueryStudentAttendanceDto } from '../dto/student-attendance/query-student-attendance.dto';
+import { StudentAttendance } from '../entities/student-attendance.entity';
 
-@ApiTags('Attendance')
+@ApiTags('Student Attendance')
 @Controller('students/attendance')
-export class AttendanceController {
-  constructor(private readonly attendanceService: AttendanceService) {}
+export class StudentAttendanceController {
+  constructor(private readonly studentAttendanceService: StudentAttendanceService) { }
 
   @Post()
   @ApiOperation({ summary: 'Mark attendance for a student' })
   @ApiResponse({
     status: 201,
     description: 'Attendance marked successfully',
-    type: Attendance,
+    type: StudentAttendance,
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation error' })
   @ApiResponse({ status: 404, description: 'Student assignment not found' })
   @ApiResponse({ status: 409, description: 'Attendance already marked for this date' })
-  create(@Body() createAttendanceDto: CreateAttendanceDto) {
-    return this.attendanceService.create(createAttendanceDto);
+  create(@Body() createStudentAttendanceDto: CreateStudentAttendanceDto) {
+    return this.studentAttendanceService.create(createStudentAttendanceDto);
   }
 
   @Post('bulk')
@@ -42,13 +42,13 @@ export class AttendanceController {
   @ApiResponse({
     status: 201,
     description: 'Bulk attendance marked successfully',
-    type: [Attendance],
+    type: [StudentAttendance],
   })
   @ApiResponse({ status: 400, description: 'Bad request - validation error' })
   @ApiResponse({ status: 404, description: 'One or more student assignments not found' })
   @ApiResponse({ status: 409, description: 'Attendance already exists for some students' })
-  bulkCreate(@Body() bulkCreateAttendanceDto: BulkCreateAttendanceDto) {
-    return this.attendanceService.bulkCreate(bulkCreateAttendanceDto);
+  bulkCreate(@Body() bulkCreateStudentAttendanceDto: BulkCreateStudentAttendanceDto) {
+    return this.studentAttendanceService.bulkCreate(bulkCreateStudentAttendanceDto);
   }
 
   @Get()
@@ -57,8 +57,8 @@ export class AttendanceController {
     status: 200,
     description: 'Attendance records retrieved successfully',
   })
-  findAll(@Query() query: QueryAttendanceDto) {
-    return this.attendanceService.findAll(query);
+  findAll(@Query() query: QueryStudentAttendanceDto) {
+    return this.studentAttendanceService.findAll(query);
   }
 
   @Get('stats')
@@ -77,7 +77,7 @@ export class AttendanceController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    return this.attendanceService.getAttendanceStats({
+    return this.studentAttendanceService.getAttendanceStats({
       classSectionCode,
       studentAssignmentId,
       startDate,
@@ -99,7 +99,7 @@ export class AttendanceController {
     @Query('month') month: string,
     @Query('year') year: string,
   ) {
-    return this.attendanceService.getMonthlyAttendance({
+    return this.studentAttendanceService.getMonthlyAttendance({
       studentAssignmentId,
       month: parseInt(month, 10),
       year: parseInt(year, 10),
@@ -111,11 +111,11 @@ export class AttendanceController {
   @ApiResponse({
     status: 200,
     description: 'Attendance record retrieved successfully',
-    type: Attendance,
+    type: StudentAttendance,
   })
   @ApiResponse({ status: 404, description: 'Attendance record not found' })
   findOne(@Param('id') id: string) {
-    return this.attendanceService.findOne(id);
+    return this.studentAttendanceService.findOne(id);
   }
 
   @Patch(':id')
@@ -123,11 +123,11 @@ export class AttendanceController {
   @ApiResponse({
     status: 200,
     description: 'Attendance record updated successfully',
-    type: Attendance,
+    type: StudentAttendance,
   })
   @ApiResponse({ status: 404, description: 'Attendance record not found' })
-  update(@Param('id') id: string, @Body() updateAttendanceDto: UpdateAttendanceDto) {
-    return this.attendanceService.update(id, updateAttendanceDto);
+  update(@Param('id') id: string, @Body() updateStudentAttendanceDto: UpdateStudentAttendanceDto) {
+    return this.studentAttendanceService.update(id, updateStudentAttendanceDto);
   }
 
   @Delete(':id')
@@ -136,6 +136,6 @@ export class AttendanceController {
   @ApiResponse({ status: 204, description: 'Attendance record deleted successfully' })
   @ApiResponse({ status: 404, description: 'Attendance record not found' })
   remove(@Param('id') id: string) {
-    return this.attendanceService.remove(id);
+    return this.studentAttendanceService.remove(id);
   }
 }

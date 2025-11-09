@@ -3,6 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Class } from './class.entity';
 import { AcademicYear } from '../../academic-years/entities/academic-year.entity';
 import { StudentAssignment } from '../../students/entities/student-assignment.entity';
+import { ClassTeacherAssignment } from '../../class-sections/entities/class-teacher-assignment.entity';
 
 @Table({
   tableName: 'class_sections',
@@ -55,6 +56,9 @@ export class ClassSection extends Model<ClassSection> {
 
   @HasMany(() => StudentAssignment, 'classSectionCode')
   assignments: StudentAssignment[];
+
+  @HasMany(() => ClassTeacherAssignment, 'classSectionCode')
+  teacherAssignments: ClassTeacherAssignment[];
 
   @Column
   createdAt: Date;

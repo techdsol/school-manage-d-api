@@ -1,33 +1,33 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { Attendance } from '../entities/attendance.entity';
+import { StudentAttendance } from '../entities/student-attendance.entity';
 import { StudentAssignment } from '../entities/student-assignment.entity';
 import { Student } from '../entities/student.entity';
 import { ClassSection } from '../../classes/entities/class-section.entity';
-import { CreateAttendanceDto } from '../dto/attendance/create-attendance.dto';
-import { UpdateAttendanceDto } from '../dto/attendance/update-attendance.dto';
-import { BulkCreateAttendanceDto } from '../dto/attendance/bulk-create-attendance.dto';
-import { QueryAttendanceDto } from '../dto/attendance/query-attendance.dto';
+import { CreateStudentAttendanceDto } from '../dto/student-attendance/create-student-attendance.dto';
+import { UpdateStudentAttendanceDto } from '../dto/student-attendance/update-student-attendance.dto';
+import { BulkCreateStudentAttendanceDto } from '../dto/student-attendance/bulk-create-student-attendance.dto';
+import { QueryStudentAttendanceDto } from '../dto/student-attendance/query-student-attendance.dto';
 import { Op } from 'sequelize';
 
 @Injectable()
-export class AttendanceService {
+export class StudentAttendanceService {
   constructor(
-    @InjectModel(Attendance)
-    private attendanceModel: typeof Attendance,
+    @InjectModel(StudentAttendance)
+    private studentAttendanceModel: typeof StudentAttendance,
     @InjectModel(StudentAssignment)
     private studentAssignmentModel: typeof StudentAssignment,
-  ) {}
+  ) { }
 
-  async create(createAttendanceDto: CreateAttendanceDto): Promise<Attendance> {
+  async create(createStudentAttendanceDto: CreateStudentAttendanceDto): Promise<StudentAttendance> {
     // Validate student assignment exists and is active
     const studentAssignment = await this.studentAssignmentModel.findByPk(
-      createAttendanceDto.studentAssignmentId,
+      createStudentAttendanceDto.studentAssignmentId,
     );
 
     if (!studentAssignment) {
       throw new NotFoundException(
-        `Student assignment with ID ${createAttendanceDto.studentAssignmentId} not found`,
+        `Student assignment with ID ${createStudentAttendanceDto.studentAssignmentId} not found`,
       );
     }
 
@@ -38,7 +38,7 @@ export class AttendanceService {
     }
 
     // Validate date is not in the future
-    const attendanceDate = new Date(createAttendanceDto.attendanceDate);
+    const attendanceDate = new Date(createStudentAttendanceDto.attendanceDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -47,10 +47,10 @@ export class AttendanceService {
     }
 
     // Check for duplicate attendance
-    const existingAttendance = await this.attendanceModel.findOne({
+    const existingAttendance = await this.studentAttendanceModel.findOne({
       where: {
-        studentAssignmentId: createAttendanceDto.studentAssignmentId,
-        attendanceDate: createAttendanceDto.attendanceDate,
+        studentAssignmentId: createStudentAttendanceDto.studentAssignmentId,
+        attendanceDate: createStudentAttendanceDto.attendanceDate,
       },
     });
 
@@ -62,19 +62,19 @@ export class AttendanceService {
 
     // Create attendance record
     const attendanceData: any = {
-      studentAssignmentId: createAttendanceDto.studentAssignmentId,
-      attendanceDate: createAttendanceDto.attendanceDate,
-      status: createAttendanceDto.status,
-      checkInTime: createAttendanceDto.checkInTime,
-      checkOutTime: createAttendanceDto.checkOutTime,
-      notes: createAttendanceDto.notes,
-      markedBy: createAttendanceDto.markedBy,
+      studentAssignmentId: createStudentAttendanceDto.studentAssignmentId,
+      attendanceDate: createStudentAttendanceDto.attendanceDate,
+      status: createStudentAttendanceDto.status,
+      checkInTime: createStudentAttendanceDto.checkInTime,
+      checkOutTime: createStudentAttendanceDto.checkOutTime,
+      notes: createStudentAttendanceDto.notes,
+      markedBy: createStudentAttendanceDto.markedBy,
     };
 
-    return this.attendanceModel.create(attendanceData);
+    return this.studentAttendanceModel.create(attendanceData);
   }
 
-  async bulkCreate(bulkCreateDto: BulkCreateAttendanceDto): Promise<Attendance[]> {
+  async bulkCreate(bulkCreateDto: BulkCreateStudentAttendanceDto): Promise<StudentAttendance[]> {
     // Validate date is not in the future
     const attendanceDate = new Date(bulkCreateDto.attendanceDate);
     const today = new Date();
@@ -110,7 +110,7 @@ export class AttendanceService {
     }
 
     // Check for existing attendance records
-    const existingAttendance = await this.attendanceModel.findAll({
+    const existingAttendance = await this.studentAttendanceModel.findAll({
       where: {
         studentAssignmentId: studentAssignmentIds,
         attendanceDate: bulkCreateDto.attendanceDate,
@@ -134,11 +134,11 @@ export class AttendanceService {
       markedBy: bulkCreateDto.markedBy,
     }));
 
-    return this.attendanceModel.bulkCreate(attendanceRecords);
+    return this.studentAttendanceModel.bulkCreate(attendanceRecords);
   }
 
-  async findAll(queryDto: QueryAttendanceDto): Promise<{
-    data: Attendance[];
+  async findAll(queryDto: QueryStudentAttendanceDto): Promise<{
+    data: StudentAttendance[];
     total: number;
     page: number;
     limit: number;
@@ -206,7 +206,7 @@ export class AttendanceService {
       };
     }
 
-    const { rows, count } = await this.attendanceModel.findAndCountAll({
+    const { rows, count } = await this.studentAttendanceModel.findAndCountAll({
       where,
       include,
       limit,
@@ -222,8 +222,8 @@ export class AttendanceService {
     };
   }
 
-  async findOne(id: string): Promise<Attendance> {
-    const attendance = await this.attendanceModel.findByPk(id, {
+  async findOne(id: string): Promise<StudentAttendance> {
+    const attendance = await this.studentAttendanceModel.findByPk(id, {
       include: [
         {
           model: StudentAssignment,
@@ -249,15 +249,15 @@ export class AttendanceService {
     return attendance;
   }
 
-  async update(id: string, updateAttendanceDto: UpdateAttendanceDto): Promise<Attendance> {
+  async update(id: string, updateStudentAttendanceDto: UpdateStudentAttendanceDto): Promise<StudentAttendance> {
     const attendance = await this.findOne(id);
 
     const updateData = {
-      status: updateAttendanceDto.status,
-      checkInTime: updateAttendanceDto.checkInTime,
-      checkOutTime: updateAttendanceDto.checkOutTime,
-      notes: updateAttendanceDto.notes,
-      markedBy: updateAttendanceDto.markedBy,
+      status: updateStudentAttendanceDto.status,
+      checkInTime: updateStudentAttendanceDto.checkInTime,
+      checkOutTime: updateStudentAttendanceDto.checkOutTime,
+      notes: updateStudentAttendanceDto.notes,
+      markedBy: updateStudentAttendanceDto.markedBy,
     };
 
     // Remove undefined fields
@@ -310,7 +310,7 @@ export class AttendanceService {
       });
     }
 
-    const attendanceRecords = await this.attendanceModel.findAll({
+    const attendanceRecords = await this.studentAttendanceModel.findAll({
       where,
       include: include.length > 0 ? include : undefined,
     });
@@ -359,7 +359,7 @@ export class AttendanceService {
     const startDate = new Date(query.year, query.month - 1, 1);
     const endDate = new Date(query.year, query.month, 0);
 
-    const attendanceRecords = await this.attendanceModel.findAll({
+    const attendanceRecords = await this.studentAttendanceModel.findAll({
       where: {
         studentAssignmentId: query.studentAssignmentId,
         attendanceDate: {

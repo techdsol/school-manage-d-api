@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsUUID, IsEnum, IsDateString, IsOptional, IsString, IsNotEmpty } from 'class-validator';
-import { AttendanceStatus } from '../../entities/attendance.entity';
+import { StudentAttendanceStatus } from '../../entities/student-attendance.entity';
 
-export class CreateAttendanceDto {
+export class CreateStudentAttendanceDto {
   @ApiProperty({ description: 'Student assignment ID' })
   @IsUUID()
   @IsNotEmpty()
@@ -13,10 +13,10 @@ export class CreateAttendanceDto {
   @IsNotEmpty()
   attendanceDate: string;
 
-  @ApiProperty({ enum: AttendanceStatus, description: 'Attendance status' })
-  @IsEnum(AttendanceStatus)
+  @ApiProperty({ enum: StudentAttendanceStatus, description: 'Attendance status' })
+  @IsEnum(StudentAttendanceStatus)
   @IsNotEmpty()
-  status: AttendanceStatus;
+  status: StudentAttendanceStatus;
 
   @ApiProperty({ required: false, description: 'Check-in time (HH:MM:SS)' })
   @IsOptional()

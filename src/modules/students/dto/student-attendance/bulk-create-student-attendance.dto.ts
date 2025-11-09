@@ -1,18 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, ValidateNested, IsDateString, IsNotEmpty, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
-import { AttendanceStatus } from '../../entities/attendance.entity';
+import { StudentAttendanceStatus } from '../../entities/student-attendance.entity';
 
-export class BulkAttendanceItemDto {
+export class BulkStudentAttendanceItemDto {
   @ApiProperty({ description: 'Student assignment ID' })
   @IsString()
   @IsNotEmpty()
   studentAssignmentId: string;
 
-  @ApiProperty({ enum: AttendanceStatus, description: 'Attendance status' })
-  @IsEnum(AttendanceStatus)
+  @ApiProperty({ enum: StudentAttendanceStatus, description: 'Attendance status' })
+  @IsEnum(StudentAttendanceStatus)
   @IsNotEmpty()
-  status: AttendanceStatus;
+  status: StudentAttendanceStatus;
 
   @ApiProperty({ required: false, description: 'Check-in time (HH:MM:SS)' })
   @IsOptional()
@@ -30,7 +30,7 @@ export class BulkAttendanceItemDto {
   notes?: string;
 }
 
-export class BulkCreateAttendanceDto {
+export class BulkCreateStudentAttendanceDto {
   @ApiProperty({ description: 'Attendance date (YYYY-MM-DD)' })
   @IsDateString()
   @IsNotEmpty()
@@ -41,9 +41,9 @@ export class BulkCreateAttendanceDto {
   @IsString()
   markedBy?: string;
 
-  @ApiProperty({ type: [BulkAttendanceItemDto], description: 'Array of attendance records' })
+  @ApiProperty({ type: [BulkStudentAttendanceItemDto], description: 'Array of attendance records' })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => BulkAttendanceItemDto)
-  attendances: BulkAttendanceItemDto[];
+  @Type(() => BulkStudentAttendanceItemDto)
+  attendances: BulkStudentAttendanceItemDto[];
 }
