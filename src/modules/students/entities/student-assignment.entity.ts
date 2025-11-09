@@ -1,7 +1,8 @@
-import { Column, Model, Table, DataType, PrimaryKey, Default, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Column, Model, Table, DataType, PrimaryKey, Default, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
 import { ApiProperty } from '@nestjs/swagger';
 import { Student } from './student.entity';
 import { ClassSection } from '../../classes/entities/class-section.entity';
+import { Attendance } from './attendance.entity';
 
 @Table({
   tableName: 'student_assignments',
@@ -30,30 +31,11 @@ export class StudentAssignment extends Model<StudentAssignment> {
   })
   classSectionCode: string;
 
-  @ApiProperty()
-  @Column({
-    type: DataType.STRING(20),
-    allowNull: false,
-  })
-  rollNumber: string;
+
 
   @ApiProperty()
   @Column({
-    type: DataType.DATEONLY,
-    allowNull: false,
-  })
-  assignmentDate: Date;
-
-  @ApiProperty({ required: false })
-  @Column({
-    type: DataType.DATEONLY,
-    allowNull: true,
-  })
-  unassignmentDate: Date;
-
-  @ApiProperty()
-  @Column({
-    type: DataType.ENUM('ACTIVE', 'INACTIVE', 'TRANSFERRED', 'WITHDRAWN'),
+    type: DataType.ENUM('ACTIVE', 'INACTIVE'),
     allowNull: false,
     defaultValue: 'ACTIVE',
   })
@@ -71,6 +53,9 @@ export class StudentAssignment extends Model<StudentAssignment> {
 
   @BelongsTo(() => ClassSection, 'classSectionCode')
   classSection: ClassSection;
+
+  @HasMany(() => Attendance, 'studentAssignmentId')
+  attendances: Attendance[];
 
   @ApiProperty()
   @Column

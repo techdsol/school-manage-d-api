@@ -14,7 +14,9 @@ The system manages:
 - **Grades** - Grade/standard levels for academic progression (independent)
 - **Teachers** - Teacher information (can be assigned to sections)
 - **Students** - Student information (can be assigned to sections)
+- **Student Assignments** - Assignment of students to specific class sections (depends on students + class sections)
 - **Teacher Specializations** - Assignment of teachers to teach specific subjects in specific classes (depends on teachers + classes + subjects)
+- **Attendance** - Daily attendance tracking for students (depends on student assignments + teachers)
 
 ---
 
@@ -180,15 +182,15 @@ _Independent entity - can be enrolled in class sections_
 
 ## 9. Student Assignments
 
-_Junction entity linking Students to Class Sections - manages student assignment to specific class sections with roll numbers_
+_Junction entity linking Students to Class Sections - manages student assignment to specific class sections_
 
-| id                                   | studentId                            | classSectionCode | rollNumber | assignmentDate | unassignmentDate | status      | notes                         | createdAt           | updatedAt           |
-| ------------------------------------ | ------------------------------------ | ---------------- | ---------- | -------------- | ---------------- | ----------- | ----------------------------- | ------------------- | ------------------- |
-| 880e8400-e29b-41d4-a716-446655440001 | 550e8400-e29b-41d4-a716-446655440001 | 1A24             | 001        | 2024-04-01     | NULL             | ACTIVE      | Regular assignment            | 2024-04-01 08:00:00 | 2024-04-01 08:00:00 |
-| 880e8400-e29b-41d4-a716-446655440002 | 550e8400-e29b-41d4-a716-446655440002 | 1A24             | 002        | 2024-04-01     | NULL             | ACTIVE      | Regular assignment            | 2024-04-01 08:15:00 | 2024-04-01 08:15:00 |
-| 880e8400-e29b-41d4-a716-446655440003 | 550e8400-e29b-41d4-a716-446655440003 | 2B24             | 001        | 2024-04-01     | NULL             | ACTIVE      | Promoted from Grade 1         | 2024-04-01 08:30:00 | 2024-04-01 08:30:00 |
-| 880e8400-e29b-41d4-a716-446655440004 | 550e8400-e29b-41d4-a716-446655440004 | KG24             | 015        | 2024-04-01     | NULL             | ACTIVE      | New admission                 | 2024-04-01 08:45:00 | 2024-04-01 08:45:00 |
-| 880e8400-e29b-41d4-a716-446655440005 | 550e8400-e29b-41d4-a716-446655440005 | 10A24            | 023        | 2024-04-01     | 2024-10-15       | TRANSFERRED | Transferred to another school | 2024-04-01 09:00:00 | 2024-10-15 14:00:00 |
+| id                                   | studentId                            | classSectionCode | status   | notes                 | createdAt           | updatedAt           |
+| ------------------------------------ | ------------------------------------ | ---------------- | -------- | --------------------- | ------------------- | ------------------- |
+| 880e8400-e29b-41d4-a716-446655440001 | 550e8400-e29b-41d4-a716-446655440001 | 1A               | ACTIVE   | Regular assignment    | 2024-04-01 08:00:00 | 2024-04-01 08:00:00 |
+| 880e8400-e29b-41d4-a716-446655440002 | 550e8400-e29b-41d4-a716-446655440002 | 1A               | ACTIVE   | Regular assignment    | 2024-04-01 08:15:00 | 2024-04-01 08:15:00 |
+| 880e8400-e29b-41d4-a716-446655440003 | 550e8400-e29b-41d4-a716-446655440003 | 2B               | ACTIVE   | Promoted from Grade 1 | 2024-04-01 08:30:00 | 2024-04-01 08:30:00 |
+| 880e8400-e29b-41d4-a716-446655440004 | 550e8400-e29b-41d4-a716-446655440004 | LKGA             | ACTIVE   | New admission         | 2024-04-01 08:45:00 | 2024-04-01 08:45:00 |
+| 880e8400-e29b-41d4-a716-446655440005 | 550e8400-e29b-41d4-a716-446655440005 | 10A              | INACTIVE | No longer enrolled    | 2024-04-01 09:00:00 | 2024-10-15 14:00:00 |
 
 ---
 
@@ -208,3 +210,25 @@ _Junction entity linking Teachers, Classes, and Subjects - defines which teacher
 | 770e8400-e29b-41d4-a716-446655440008 | 660e8400-e29b-41d4-a716-446655440005 | ARTS      | ART         | Creative Arts Program | 2024-01-20 10:35:00 | 2024-01-20 10:35:00 |
 | 770e8400-e29b-41d4-a716-446655440009 | 660e8400-e29b-41d4-a716-446655440005 | SPRT      | PE          | Sports & Physical Ed  | 2024-01-20 10:40:00 | 2024-01-20 10:40:00 |
 | 770e8400-e29b-41d4-a716-446655440010 | 660e8400-e29b-41d4-a716-446655440002 | 6         | COMP        | Computer Basics       | 2024-01-20 10:45:00 | 2024-01-20 10:45:00 |
+
+---
+
+## 11. Attendance
+
+_Tracks daily attendance for students in their assigned class sections_
+
+| id                                   | studentAssignmentId                  | attendanceDate | status   | checkInTime | checkOutTime | notes                  | markedBy                             | createdAt           | updatedAt           |
+| ------------------------------------ | ------------------------------------ | -------------- | -------- | ----------- | ------------ | ---------------------- | ------------------------------------ | ------------------- | ------------------- |
+| 990e8400-e29b-41d4-a716-446655440001 | 880e8400-e29b-41d4-a716-446655440001 | 2024-11-01     | PRESENT  | 08:30:00    | 15:00:00     | On time                | 660e8400-e29b-41d4-a716-446655440001 | 2024-11-01 08:30:00 | 2024-11-01 08:30:00 |
+| 990e8400-e29b-41d4-a716-446655440002 | 880e8400-e29b-41d4-a716-446655440002 | 2024-11-01     | LATE     | 09:15:00    | 15:00:00     | Arrived 45 mins late   | 660e8400-e29b-41d4-a716-446655440001 | 2024-11-01 09:15:00 | 2024-11-01 09:15:00 |
+| 990e8400-e29b-41d4-a716-446655440003 | 880e8400-e29b-41d4-a716-446655440003 | 2024-11-01     | PRESENT  | 08:25:00    | 15:00:00     | Early arrival          | 660e8400-e29b-41d4-a716-446655440002 | 2024-11-01 08:25:00 | 2024-11-01 08:25:00 |
+| 990e8400-e29b-41d4-a716-446655440004 | 880e8400-e29b-41d4-a716-446655440004 | 2024-11-01     | PRESENT  | 08:30:00    | 15:00:00     | Regular attendance     | 660e8400-e29b-41d4-a716-446655440003 | 2024-11-01 08:30:00 | 2024-11-01 08:30:00 |
+| 990e8400-e29b-41d4-a716-446655440005 | 880e8400-e29b-41d4-a716-446655440001 | 2024-11-04     | SICK     | NULL        | NULL         | Medical certificate    | 660e8400-e29b-41d4-a716-446655440001 | 2024-11-04 10:00:00 | 2024-11-04 10:00:00 |
+| 990e8400-e29b-41d4-a716-446655440006 | 880e8400-e29b-41d4-a716-446655440002 | 2024-11-04     | PRESENT  | 08:30:00    | 15:00:00     | NULL                   | 660e8400-e29b-41d4-a716-446655440001 | 2024-11-04 08:30:00 | 2024-11-04 08:30:00 |
+| 990e8400-e29b-41d4-a716-446655440007 | 880e8400-e29b-41d4-a716-446655440003 | 2024-11-04     | ABSENT   | NULL        | NULL         | No notification        | 660e8400-e29b-41d4-a716-446655440002 | 2024-11-04 16:00:00 | 2024-11-04 16:00:00 |
+| 990e8400-e29b-41d4-a716-446655440008 | 880e8400-e29b-41d4-a716-446655440004 | 2024-11-04     | HALF_DAY | 08:30:00    | 12:00:00     | Left early - doctor    | 660e8400-e29b-41d4-a716-446655440003 | 2024-11-04 08:30:00 | 2024-11-04 12:00:00 |
+| 990e8400-e29b-41d4-a716-446655440009 | 880e8400-e29b-41d4-a716-446655440001 | 2024-11-05     | PRESENT  | 08:30:00    | 15:00:00     | NULL                   | 660e8400-e29b-41d4-a716-446655440001 | 2024-11-05 08:30:00 | 2024-11-05 08:30:00 |
+| 990e8400-e29b-41d4-a716-446655440010 | 880e8400-e29b-41d4-a716-446655440002 | 2024-11-05     | PRESENT  | 08:30:00    | 15:00:00     | NULL                   | 660e8400-e29b-41d4-a716-446655440001 | 2024-11-05 08:30:00 | 2024-11-05 08:30:00 |
+| 990e8400-e29b-41d4-a716-446655440011 | 880e8400-e29b-41d4-a716-446655440003 | 2024-11-05     | EXCUSED  | NULL        | NULL         | Family emergency       | 660e8400-e29b-41d4-a716-446655440002 | 2024-11-05 09:00:00 | 2024-11-05 09:00:00 |
+| 990e8400-e29b-41d4-a716-446655440012 | 880e8400-e29b-41d4-a716-446655440004 | 2024-11-05     | PRESENT  | 08:30:00    | 15:00:00     | NULL                   | 660e8400-e29b-41d4-a716-446655440003 | 2024-11-05 08:30:00 | 2024-11-05 08:30:00 |
+
