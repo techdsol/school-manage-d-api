@@ -1,6 +1,7 @@
 # Attendance Completion Report Feature
 
 ## Overview
+
 This feature tracks attendance completion rates for class sections over a date range. It helps identify when teachers fail to mark attendance for entire periods, enabling better accountability and reporting.
 
 ## Endpoint
@@ -10,8 +11,9 @@ This feature tracks attendance completion rates for class sections over a date r
 **Description**: Generate a report showing which timetable periods have missing or incomplete attendance records.
 
 **Query Parameters**:
+
 - `startDate` (required) - Start date in YYYY-MM-DD format
-- `endDate` (required) - End date in YYYY-MM-DD format  
+- `endDate` (required) - End date in YYYY-MM-DD format
 - `classSectionCode` (optional) - Filter by specific class section (e.g., "1A")
 - `academicYear` (optional) - Filter by academic year (e.g., "2024-2025")
 - `minCompletionPercent` (optional) - Show only sections with completion rate below this percentage (0-100)
@@ -19,14 +21,17 @@ This feature tracks attendance completion rates for class sections over a date r
 ## Use Cases
 
 ### 1. Weekly Attendance Audit
+
 **Scenario**: Principal wants to see which teachers missed marking attendance last week.
 
 **Request**:
+
 ```
 GET /students/attendance/completion-report?startDate=2024-11-04&endDate=2024-11-10
 ```
 
 **Response**:
+
 ```json
 {
   "summary": {
@@ -117,9 +122,11 @@ GET /students/attendance/completion-report?startDate=2024-11-04&endDate=2024-11-
 ```
 
 ### 2. Find Problem Classes
+
 **Scenario**: Identify class sections with less than 80% attendance completion.
 
 **Request**:
+
 ```
 GET /students/attendance/completion-report?startDate=2024-11-04&endDate=2024-11-10&minCompletionPercent=80
 ```
@@ -127,9 +134,11 @@ GET /students/attendance/completion-report?startDate=2024-11-04&endDate=2024-11-
 **Response**: Only shows class sections where `completionRate < 80`
 
 ### 3. Single Class Section Audit
+
 **Scenario**: Check attendance completion for Class 1A specifically.
 
 **Request**:
+
 ```
 GET /students/attendance/completion-report?startDate=2024-11-04&endDate=2024-11-10&classSectionCode=1A
 ```
@@ -137,9 +146,11 @@ GET /students/attendance/completion-report?startDate=2024-11-04&endDate=2024-11-
 **Response**: Shows only Class 1A data
 
 ### 4. Academic Year Report
+
 **Scenario**: Monthly report for current academic year.
 
 **Request**:
+
 ```
 GET /students/attendance/completion-report?startDate=2024-11-01&endDate=2024-11-30&academicYear=2024-2025
 ```
@@ -147,6 +158,7 @@ GET /students/attendance/completion-report?startDate=2024-11-01&endDate=2024-11-
 ## Response Field Descriptions
 
 ### Summary Object
+
 - `totalClassSections`: Number of class sections in the report
 - `totalPeriods`: Total timetable periods requiring attendance
 - `completedPeriods`: Periods with 100% attendance marked
@@ -154,6 +166,7 @@ GET /students/attendance/completion-report?startDate=2024-11-01&endDate=2024-11-
 - `completionRate`: Overall completion percentage
 
 ### Class Section Object
+
 - `classSectionCode`: Unique identifier (e.g., "1A")
 - `className`: Class name (e.g., "Class 1")
 - `sectionName`: Section identifier (e.g., "A")
@@ -165,6 +178,7 @@ GET /students/attendance/completion-report?startDate=2024-11-01&endDate=2024-11-
 - `completionRate`: Section-level completion percentage
 
 ### Period Object
+
 - `status`: One of:
   - `COMPLETE`: 100% students marked
   - `PARTIAL`: 1-99% students marked
@@ -175,6 +189,7 @@ GET /students/attendance/completion-report?startDate=2024-11-01&endDate=2024-11-
 - `presentCount`, `absentCount`, `lateCount`: Breakdown by status
 
 ### Daily Summary Object
+
 - `totalPeriods`: Periods scheduled for this day
 - `markedPeriods`: Periods with complete attendance
 - `unmarkedPeriods`: Periods with no attendance
@@ -183,35 +198,42 @@ GET /students/attendance/completion-report?startDate=2024-11-01&endDate=2024-11-
 ## Business Logic
 
 ### Completion Calculation
+
 ```typescript
-completionPercent = (markedStudents / expectedStudents) * 100
+completionPercent = (markedStudents / expectedStudents) * 100;
 ```
 
 ### Status Determination
+
 - `COMPLETE`: completionPercent === 100
 - `PARTIAL`: 0 < completionPercent < 100
 - `NOT_MARKED`: completionPercent === 0
 
 ### Day Matching
+
 Only timetable entries where `dayOfWeek` matches the actual day of the date are included.
 
 ### Expected Students Count
+
 Based on active `student_assignments` for the class section at the time of the report.
 
 ## Implementation Details
 
 ### Files Created/Modified
+
 1. **DTO**: `src/modules/students/dto/student-attendance/query-attendance-completion.dto.ts`
 2. **Service**: `src/modules/students/services/student-attendance.service.ts` (added method)
 3. **Controller**: `src/modules/students/controllers/student-attendance.controller.ts` (added endpoint)
 
 ### Database Queries
+
 - Fetches timetable entries with `requiresAttendance = true` and `status = 'ACTIVE'`
 - Counts student assignments per class section
 - Counts attendance records per timetable+date combination
 - Efficient aggregation using Maps for O(n) complexity
 
 ### Performance Considerations
+
 - For large date ranges (>30 days), consider pagination
 - For many class sections (>50), query may take 2-3 seconds
 - Recommend caching results for frequently accessed reports

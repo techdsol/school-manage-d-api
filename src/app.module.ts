@@ -7,6 +7,7 @@ import { TeachersModule } from './modules/teachers';
 import { ClassesModule } from './modules/classes';
 import { SubjectsModule } from './modules/subjects';
 import { AcademicYearsModule } from './modules/academic-years';
+import { PaymentsModule } from './modules/payments/payments.module';
 import { getDatabaseConfig } from './config/database.config';
 
 @Module({
@@ -25,6 +26,7 @@ import { getDatabaseConfig } from './config/database.config';
     ClassesModule,
     SubjectsModule,
     AcademicYearsModule,
+    PaymentsModule,
   ],
   controllers: [],
   providers: [],

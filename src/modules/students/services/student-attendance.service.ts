@@ -768,7 +768,7 @@ export class StudentAttendanceService {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const dates: Date[] = [];
-    
+
     for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
       dates.push(new Date(date));
     }
@@ -789,7 +789,7 @@ export class StudentAttendanceService {
 
     for (const timetable of timetableEntries) {
       const sectionCode = timetable.classSectionCode;
-      
+
       if (!classSectionMap.has(sectionCode)) {
         // Get total enrolled students for this section
         const enrolledStudents = await this.studentAssignmentModel.count({
@@ -836,8 +836,8 @@ export class StudentAttendanceService {
 
         const markedCount = attendanceRecords.length;
         const expectedCount = sectionData.totalStudents;
-        const completionPercent = expectedCount > 0 
-          ? Math.round((markedCount / expectedCount) * 100) 
+        const completionPercent = expectedCount > 0
+          ? Math.round((markedCount / expectedCount) * 100)
           : 0;
 
         // Count by status
@@ -861,7 +861,7 @@ export class StudentAttendanceService {
           periodType: timetable.periodType,
           subject: timetable.subject?.name || 'N/A',
           subjectCode: timetable.subjectCode,
-          teacher: timetable.teacher 
+          teacher: timetable.teacher
             ? timetable.teacher.name
             : 'Not Assigned',
           teacherId: timetable.teacherId,
@@ -893,7 +893,7 @@ export class StudentAttendanceService {
 
         const dailyData = sectionData.dailySummary.get(dateStr);
         dailyData.totalPeriods++;
-        
+
         if (status === 'COMPLETE') {
           dailyData.markedPeriods++;
         } else if (status === 'NOT_MARKED') {

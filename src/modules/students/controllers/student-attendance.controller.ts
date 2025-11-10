@@ -173,7 +173,7 @@ export class StudentAttendanceController {
   }
 
   @Get('completion-report')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get attendance completion report for a date range',
     description: 'Shows which timetable periods have missing or incomplete attendance. Helps identify when teachers fail to mark attendance for entire class sections.'
   })
