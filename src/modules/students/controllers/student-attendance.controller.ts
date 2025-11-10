@@ -16,6 +16,7 @@ import { CreateStudentAttendanceDto } from '../dto/student-attendance/create-stu
 import { UpdateStudentAttendanceDto } from '../dto/student-attendance/update-student-attendance.dto';
 import { BulkCreateStudentAttendanceDto } from '../dto/student-attendance/bulk-create-student-attendance.dto';
 import { QueryStudentAttendanceDto } from '../dto/student-attendance/query-student-attendance.dto';
+import { QueryAttendanceCompletionDto } from '../dto/student-attendance/query-attendance-completion.dto';
 import { StudentAttendance } from '../entities/student-attendance.entity';
 
 @ApiTags('Student Attendance')
@@ -169,5 +170,24 @@ export class StudentAttendanceController {
   @ApiResponse({ status: 404, description: 'Attendance record not found' })
   remove(@Param('id') id: string) {
     return this.studentAttendanceService.remove(id);
+  }
+
+  @Get('completion-report')
+  @ApiOperation({ 
+    summary: 'Get attendance completion report for a date range',
+    description: 'Shows which timetable periods have missing or incomplete attendance. Helps identify when teachers fail to mark attendance for entire class sections.'
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Attendance completion report generated successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - invalid date range' })
+  @ApiQuery({ name: 'startDate', required: true, description: 'Start date (YYYY-MM-DD)', example: '2024-11-01' })
+  @ApiQuery({ name: 'endDate', required: true, description: 'End date (YYYY-MM-DD)', example: '2024-11-07' })
+  @ApiQuery({ name: 'classSectionCode', required: false, description: 'Filter by class section', example: '1A' })
+  @ApiQuery({ name: 'academicYear', required: false, description: 'Filter by academic year', example: '2024-2025' })
+  @ApiQuery({ name: 'minCompletionPercent', required: false, description: 'Show only sections below this completion %', example: 80 })
+  getCompletionReport(@Query() query: QueryAttendanceCompletionDto) {
+    return this.studentAttendanceService.getAttendanceCompletionReport(query);
   }
 }

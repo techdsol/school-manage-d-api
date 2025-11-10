@@ -12,15 +12,17 @@ This document outlines the enhancements made to make the API production-ready fo
 
 #### **New Endpoints:**
 
-| Endpoint | Method | Purpose | Response |
-|----------|--------|---------|----------|
-| `/students/attendance/timetable/:timetableId/students` | GET | Get students enrolled in a class for marking attendance | List of students with current attendance status |
-| `/students/attendance/unmarked` | GET | Get unmarked attendance periods for a date | List of periods requiring attendance with completion status |
+| Endpoint                                               | Method | Purpose                                                 | Response                                                    |
+| ------------------------------------------------------ | ------ | ------------------------------------------------------- | ----------------------------------------------------------- |
+| `/students/attendance/timetable/:timetableId/students` | GET    | Get students enrolled in a class for marking attendance | List of students with current attendance status             |
+| `/students/attendance/unmarked`                        | GET    | Get unmarked attendance periods for a date              | List of periods requiring attendance with completion status |
 
 **Query Parameters:**
+
 - `date` (optional): Date to check attendance (YYYY-MM-DD), defaults to today
 
 **Example Response for `/students/attendance/timetable/:id/students?date=2024-11-10`:**
+
 ```json
 {
   "timetable": {
@@ -67,15 +69,17 @@ This document outlines the enhancements made to make the API production-ready fo
 
 #### **New Endpoints:**
 
-| Endpoint | Method | Purpose | Response |
-|----------|--------|---------|----------|
-| `/timetable/today` | GET | Get today's timetable periods requiring attendance | List of periods for current day |
+| Endpoint           | Method | Purpose                                            | Response                        |
+| ------------------ | ------ | -------------------------------------------------- | ------------------------------- |
+| `/timetable/today` | GET    | Get today's timetable periods requiring attendance | List of periods for current day |
 
 **Query Parameters:**
+
 - `classSectionCode` (optional): Filter by class section
 - `academicYear` (optional): Filter by academic year
 
 **Example Response:**
+
 ```json
 {
   "date": "2024-11-10",
@@ -103,21 +107,22 @@ This document outlines the enhancements made to make the API production-ready fo
 
 #### **Enhanced Endpoints:**
 
-| Endpoint | Changes | Impact |
-|----------|---------|--------|
-| `GET /student-assignments` | Now includes student `phone` field | Can contact parents directly |
-| `GET /student-assignments/active` | Now includes student `phone` field | Can contact parents directly |
-| `GET /student-assignments/:id` | Now includes student `phone` field | Complete student information |
-| `GET /student-assignments/student/:id` | Now includes student `phone` field | Complete student information |
+| Endpoint                                       | Changes                            | Impact                       |
+| ---------------------------------------------- | ---------------------------------- | ---------------------------- |
+| `GET /student-assignments`                     | Now includes student `phone` field | Can contact parents directly |
+| `GET /student-assignments/active`              | Now includes student `phone` field | Can contact parents directly |
+| `GET /student-assignments/:id`                 | Now includes student `phone` field | Complete student information |
+| `GET /student-assignments/student/:id`         | Now includes student `phone` field | Complete student information |
 | `GET /student-assignments/class-section/:code` | Now includes student `phone` field | Complete student information |
 
 #### **New Endpoints:**
 
-| Endpoint | Method | Purpose | Response |
-|----------|--------|---------|----------|
-| `/student-assignments/class-section/:code/active-students` | GET | Get active students with full details for attendance marking | Formatted list of students |
+| Endpoint                                                   | Method | Purpose                                                      | Response                   |
+| ---------------------------------------------------------- | ------ | ------------------------------------------------------------ | -------------------------- |
+| `/student-assignments/class-section/:code/active-students` | GET    | Get active students with full details for attendance marking | Formatted list of students |
 
 **Example Response:**
+
 ```json
 {
   "classSection": {
@@ -145,14 +150,16 @@ This document outlines the enhancements made to make the API production-ready fo
 
 #### **New Endpoints:**
 
-| Endpoint | Method | Purpose | Response |
-|----------|--------|---------|----------|
-| `/teachers/attendance/list-for-marking` | GET | Get all teachers with their attendance status for today | List of teachers with attendance status |
+| Endpoint                                | Method | Purpose                                                 | Response                                |
+| --------------------------------------- | ------ | ------------------------------------------------------- | --------------------------------------- |
+| `/teachers/attendance/list-for-marking` | GET    | Get all teachers with their attendance status for today | List of teachers with attendance status |
 
 **Query Parameters:**
+
 - `date` (optional): Date to check (YYYY-MM-DD), defaults to today
 
 **Example Response:**
+
 ```json
 {
   "date": "2024-11-10",
@@ -184,13 +191,13 @@ This document outlines the enhancements made to make the API production-ready fo
 
 ### Before vs After
 
-| Aspect | Before | After | Improvement |
-|--------|--------|-------|-------------|
-| **Student List for Attendance** | Had to make 3-4 API calls | Single endpoint with all data | 75% fewer API calls |
-| **Student Phone Numbers** | Missing from assignment queries | Included in all responses | Can contact parents |
-| **Today's Schedule** | Had to filter client-side | Server-side filtering by day | Better performance |
-| **Unmarked Attendance** | No way to track | Dedicated endpoint with stats | Complete visibility |
-| **Teacher List for Marking** | Had to make multiple calls | Single call with status | Simplified workflow |
+| Aspect                          | Before                          | After                         | Improvement         |
+| ------------------------------- | ------------------------------- | ----------------------------- | ------------------- |
+| **Student List for Attendance** | Had to make 3-4 API calls       | Single endpoint with all data | 75% fewer API calls |
+| **Student Phone Numbers**       | Missing from assignment queries | Included in all responses     | Can contact parents |
+| **Today's Schedule**            | Had to filter client-side       | Server-side filtering by day  | Better performance  |
+| **Unmarked Attendance**         | No way to track                 | Dedicated endpoint with stats | Complete visibility |
+| **Teacher List for Marking**    | Had to make multiple calls      | Single call with status       | Simplified workflow |
 
 ---
 

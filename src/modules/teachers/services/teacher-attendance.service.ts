@@ -361,12 +361,12 @@ export class TeacherAttendanceService {
           phone: teacher.phone,
           attendance: attendance
             ? {
-                id: attendance.id,
-                status: attendance.status,
-                checkInTime: attendance.checkInTime,
-                checkOutTime: attendance.checkOutTime,
-                notes: attendance.notes,
-              }
+              id: attendance.id,
+              status: attendance.status,
+              checkInTime: attendance.checkInTime,
+              checkOutTime: attendance.checkOutTime,
+              notes: attendance.notes,
+            }
             : null,
         };
       }),

@@ -15,7 +15,7 @@ export class StudentAssignmentService {
     private studentModel: typeof Student,
     @InjectModel(ClassSection)
     private classSectionModel: typeof ClassSection,
-  ) {}
+  ) { }
 
   async create(createStudentAssignmentDto: CreateStudentAssignmentDto): Promise<StudentAssignment> {
     // Validate student exists
@@ -152,7 +152,7 @@ export class StudentAssignmentService {
     }
 
     const assignments = await this.studentAssignmentModel.findAll({
-      where: { 
+      where: {
         classSectionCode,
         status: 'ACTIVE',
       },

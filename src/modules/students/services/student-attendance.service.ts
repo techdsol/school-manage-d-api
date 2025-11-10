@@ -12,7 +12,9 @@ import { CreateStudentAttendanceDto } from '../dto/student-attendance/create-stu
 import { UpdateStudentAttendanceDto } from '../dto/student-attendance/update-student-attendance.dto';
 import { BulkCreateStudentAttendanceDto } from '../dto/student-attendance/bulk-create-student-attendance.dto';
 import { QueryStudentAttendanceDto } from '../dto/student-attendance/query-student-attendance.dto';
+import { QueryAttendanceCompletionDto } from '../dto/student-attendance/query-attendance-completion.dto';
 import { Op } from 'sequelize';
+import { StudentAssignment } from '../entities/student-assignment.entity';
 
 @Injectable()
 export class StudentAttendanceService {
@@ -23,6 +25,8 @@ export class StudentAttendanceService {
     private timetableModel: typeof Timetable,
     @InjectModel(Student)
     private studentModel: typeof Student,
+    @InjectModel(StudentAssignment)
+    private studentAssignmentModel: typeof StudentAssignment,
   ) { }
 
   async create(createStudentAttendanceDto: CreateStudentAttendanceDto): Promise<StudentAttendance> {
@@ -590,12 +594,12 @@ export class StudentAttendanceService {
           assignmentId: assignment.id,
           attendance: attendance
             ? {
-                id: attendance.id,
-                status: attendance.status,
-                checkInTime: attendance.checkInTime,
-                checkOutTime: attendance.checkOutTime,
-                notes: attendance.notes,
-              }
+              id: attendance.id,
+              status: attendance.status,
+              checkInTime: attendance.checkInTime,
+              checkOutTime: attendance.checkOutTime,
+              notes: attendance.notes,
+            }
             : null,
         };
       }),
@@ -717,6 +721,241 @@ export class StudentAttendanceService {
       completedPeriods: unmarkedPeriods.filter((p) => p.isComplete).length,
       pendingPeriods: unmarkedPeriods.filter((p) => !p.isComplete).length,
       periods: unmarkedPeriods,
+    };
+  }
+
+  /**
+   * Get attendance completion report for a date range
+   * Shows which timetable periods have missing or incomplete attendance
+   */
+  async getAttendanceCompletionReport(query: QueryAttendanceCompletionDto) {
+    const { startDate, endDate, classSectionCode, academicYear, minCompletionPercent } = query;
+
+    // Build where clause for timetable
+    const timetableWhere: any = {
+      requiresAttendance: true,
+      status: 'ACTIVE',
+    };
+
+    if (classSectionCode) {
+      timetableWhere.classSectionCode = classSectionCode;
+    }
+
+    if (academicYear) {
+      timetableWhere.academicYear = academicYear;
+    }
+
+    // Get all timetable entries that require attendance
+    const timetableEntries = await this.timetableModel.findAll({
+      where: timetableWhere,
+      include: [
+        {
+          model: ClassSection,
+          include: [
+            {
+              model: Class,
+              include: [ClassType],
+            },
+          ],
+        },
+        { model: Subject },
+        { model: Teacher },
+      ],
+      order: [['classSectionCode', 'ASC'], ['dayOfWeek', 'ASC'], ['startTime', 'ASC']],
+    });
+
+    // Generate date range
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const dates: Date[] = [];
+    
+    for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+      dates.push(new Date(date));
+    }
+
+    // Map day names to numbers for comparison
+    const dayMap = {
+      SUNDAY: 0,
+      MONDAY: 1,
+      TUESDAY: 2,
+      WEDNESDAY: 3,
+      THURSDAY: 4,
+      FRIDAY: 5,
+      SATURDAY: 6,
+    };
+
+    // Group by class section
+    const classSectionMap = new Map<string, any>();
+
+    for (const timetable of timetableEntries) {
+      const sectionCode = timetable.classSectionCode;
+      
+      if (!classSectionMap.has(sectionCode)) {
+        // Get total enrolled students for this section
+        const enrolledStudents = await this.studentAssignmentModel.count({
+          where: {
+            classSectionCode: sectionCode,
+            status: 'ACTIVE',
+          },
+        });
+
+        classSectionMap.set(sectionCode, {
+          classSectionCode: sectionCode,
+          className: timetable.classSection?.classDetails?.name || 'Unknown',
+          sectionName: timetable.classSection?.section || 'Unknown',
+          classType: timetable.classSection?.classDetails?.classTypeDetails?.type || 'Unknown',
+          totalStudents: enrolledStudents,
+          periods: [],
+          dailySummary: new Map<string, any>(),
+        });
+      }
+    }
+
+    // Process each date and timetable entry
+    for (const date of dates) {
+      const dayOfWeek = Object.keys(dayMap).find(
+        key => dayMap[key] === date.getDay()
+      );
+      const dateStr = date.toISOString().split('T')[0];
+
+      for (const timetable of timetableEntries) {
+        if (timetable.dayOfWeek !== dayOfWeek) {
+          continue; // Skip if not matching day
+        }
+
+        const sectionCode = timetable.classSectionCode;
+        const sectionData = classSectionMap.get(sectionCode);
+
+        // Count attendance records for this timetable + date
+        const attendanceRecords = await this.studentAttendanceModel.findAll({
+          where: {
+            timetableId: timetable.id,
+            attendanceDate: dateStr,
+          },
+        });
+
+        const markedCount = attendanceRecords.length;
+        const expectedCount = sectionData.totalStudents;
+        const completionPercent = expectedCount > 0 
+          ? Math.round((markedCount / expectedCount) * 100) 
+          : 0;
+
+        // Count by status
+        const presentCount = attendanceRecords.filter(r => r.status === 'PRESENT').length;
+        const absentCount = attendanceRecords.filter(r => r.status === 'ABSENT').length;
+        const lateCount = attendanceRecords.filter(r => r.status === 'LATE').length;
+
+        // Determine status
+        let status = 'NOT_MARKED';
+        if (completionPercent === 100) {
+          status = 'COMPLETE';
+        } else if (completionPercent > 0) {
+          status = 'PARTIAL';
+        }
+
+        const periodData = {
+          date: dateStr,
+          timetableId: timetable.id,
+          dayOfWeek: timetable.dayOfWeek,
+          periodNumber: timetable.periodNumber,
+          periodType: timetable.periodType,
+          subject: timetable.subject?.name || 'N/A',
+          subjectCode: timetable.subjectCode,
+          teacher: timetable.teacher 
+            ? timetable.teacher.name
+            : 'Not Assigned',
+          teacherId: timetable.teacherId,
+          startTime: timetable.startTime,
+          endTime: timetable.endTime,
+          room: timetable.room,
+          expectedStudents: expectedCount,
+          markedStudents: markedCount,
+          completionPercent,
+          status,
+          presentCount,
+          absentCount,
+          lateCount,
+        };
+
+        sectionData.periods.push(periodData);
+
+        // Update daily summary
+        if (!sectionData.dailySummary.has(dateStr)) {
+          sectionData.dailySummary.set(dateStr, {
+            date: dateStr,
+            dayOfWeek,
+            totalPeriods: 0,
+            markedPeriods: 0,
+            unmarkedPeriods: 0,
+            completionRate: 0,
+          });
+        }
+
+        const dailyData = sectionData.dailySummary.get(dateStr);
+        dailyData.totalPeriods++;
+        
+        if (status === 'COMPLETE') {
+          dailyData.markedPeriods++;
+        } else if (status === 'NOT_MARKED') {
+          dailyData.unmarkedPeriods++;
+        }
+      }
+    }
+
+    // Calculate daily completion rates and convert to arrays
+    const classSections = Array.from(classSectionMap.values()).map(section => {
+      // Convert daily summary map to array and calculate rates
+      const dailySummaryArray = Array.from(section.dailySummary.values()).map((day: any) => {
+        day.completionRate = day.totalPeriods > 0
+          ? Math.round((day.markedPeriods / day.totalPeriods) * 100)
+          : 0;
+        return day;
+      });
+
+      // Calculate overall section completion rate
+      const totalPeriods = section.periods.length;
+      const completedPeriods = section.periods.filter(p => p.status === 'COMPLETE').length;
+      const sectionCompletionRate = totalPeriods > 0
+        ? Math.round((completedPeriods / totalPeriods) * 100)
+        : 0;
+
+      return {
+        ...section,
+        dailySummary: dailySummaryArray,
+        totalPeriods,
+        completedPeriods,
+        incompletePeriods: totalPeriods - completedPeriods,
+        completionRate: sectionCompletionRate,
+      };
+    });
+
+    // Filter by minimum completion percentage if specified
+    let filteredSections = classSections;
+    if (minCompletionPercent !== undefined) {
+      filteredSections = classSections.filter(
+        section => section.completionRate < minCompletionPercent
+      );
+    }
+
+    // Calculate overall summary
+    const totalPeriods = filteredSections.reduce((sum, s) => sum + s.totalPeriods, 0);
+    const completedPeriods = filteredSections.reduce((sum, s) => sum + s.completedPeriods, 0);
+    const incompletePeriods = totalPeriods - completedPeriods;
+    const overallCompletionRate = totalPeriods > 0
+      ? Math.round((completedPeriods / totalPeriods) * 100)
+      : 0;
+
+    return {
+      summary: {
+        startDate,
+        endDate,
+        totalClassSections: filteredSections.length,
+        totalPeriods,
+        completedPeriods,
+        incompletePeriods,
+        completionRate: overallCompletionRate,
+      },
+      classSections: filteredSections,
     };
   }
 }
