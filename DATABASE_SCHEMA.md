@@ -17,6 +17,7 @@ The system manages:
 - **Student Assignments** - Assignment of students to specific class sections (depends on students + class sections)
 - **Teacher Specializations** - Assignment of teachers to teach specific subjects in specific classes (depends on teachers + classes + subjects)
 - **Class Teacher Assignments** - Assignment of teachers as primary/secondary class teachers for class sections (depends on teachers + class sections)
+- **Class Subjects** - Assignment of subjects to class sections with optional teacher assignment (depends on class sections + subjects + teachers)
 - **Student Attendance** - Daily attendance tracking for students (depends on student assignments + teachers)
 - **Teacher Attendance** - Daily attendance tracking for teachers (depends on teachers)
 
@@ -220,7 +221,31 @@ _Junction entity linking Teachers to Class Sections - defines which teacher is t
 
 ---
 
-## 12. Student Attendance
+## 12. Class Subjects
+
+_Junction entity linking Class Sections to Subjects - defines which subjects are taught in which class sections with optional teacher assignment_
+
+| id                                   | classSectionCode | subjectCode | teacherId                            | status   | notes                         | createdAt           | updatedAt           |
+| ------------------------------------ | ---------------- | ----------- | ------------------------------------ | -------- | ----------------------------- | ------------------- | ------------------- |
+| cc0e8400-e29b-41d4-a716-446655440001 | 1A               | MATH        | 660e8400-e29b-41d4-a716-446655440001 | ACTIVE   | NULL                          | 2024-04-02 09:00:00 | 2024-04-02 09:00:00 |
+| cc0e8400-e29b-41d4-a716-446655440002 | 1A               | ENG         | 660e8400-e29b-41d4-a716-446655440002 | ACTIVE   | NULL                          | 2024-04-02 09:05:00 | 2024-04-02 09:05:00 |
+| cc0e8400-e29b-41d4-a716-446655440003 | 1A               | HINDI       | 660e8400-e29b-41d4-a716-446655440003 | ACTIVE   | NULL                          | 2024-04-02 09:10:00 | 2024-04-02 09:10:00 |
+| cc0e8400-e29b-41d4-a716-446655440004 | 1A               | PE          | 660e8400-e29b-41d4-a716-446655440005 | ACTIVE   | Physical education classes    | 2024-04-02 09:15:00 | 2024-04-02 09:15:00 |
+| cc0e8400-e29b-41d4-a716-446655440005 | 2B               | MATH        | 660e8400-e29b-41d4-a716-446655440001 | ACTIVE   | NULL                          | 2024-04-02 09:20:00 | 2024-04-02 09:20:00 |
+| cc0e8400-e29b-41d4-a716-446655440006 | 2B               | ENG         | 660e8400-e29b-41d4-a716-446655440002 | ACTIVE   | NULL                          | 2024-04-02 09:25:00 | 2024-04-02 09:25:00 |
+| cc0e8400-e29b-41d4-a716-446655440007 | 2B               | SCI         | NULL                                 | ACTIVE   | Teacher not assigned yet      | 2024-04-02 09:30:00 | 2024-04-02 09:30:00 |
+| cc0e8400-e29b-41d4-a716-446655440008 | LKGA             | ART         | 660e8400-e29b-41d4-a716-446655440005 | ACTIVE   | Arts and crafts for LKG       | 2024-04-02 09:35:00 | 2024-04-02 09:35:00 |
+| cc0e8400-e29b-41d4-a716-446655440009 | LKGA             | MUS         | NULL                                 | ACTIVE   | Music classes                 | 2024-04-02 09:40:00 | 2024-04-02 09:40:00 |
+| cc0e8400-e29b-41d4-a716-446655440010 | 10A              | MATH        | 660e8400-e29b-41d4-a716-446655440001 | ACTIVE   | Advanced mathematics          | 2024-04-02 09:45:00 | 2024-04-02 09:45:00 |
+| cc0e8400-e29b-41d4-a716-446655440011 | 10A              | PHYS        | 660e8400-e29b-41d4-a716-446655440004 | ACTIVE   | Physics board preparation     | 2024-04-02 09:50:00 | 2024-04-02 09:50:00 |
+| cc0e8400-e29b-41d4-a716-446655440012 | 10A              | CHEM        | NULL                                 | ACTIVE   | Chemistry - teacher pending   | 2024-04-02 09:55:00 | 2024-04-02 09:55:00 |
+| cc0e8400-e29b-41d4-a716-446655440013 | 10A              | ENG         | 660e8400-e29b-41d4-a716-446655440002 | ACTIVE   | English literature            | 2024-04-02 10:00:00 | 2024-04-02 10:00:00 |
+| cc0e8400-e29b-41d4-a716-446655440014 | ART1             | ART         | 660e8400-e29b-41d4-a716-446655440005 | ACTIVE   | Extra-curricular arts program | 2024-04-02 10:05:00 | 2024-04-02 10:05:00 |
+| cc0e8400-e29b-41d4-a716-446655440015 | 6A               | COMP        | 660e8400-e29b-41d4-a716-446655440002 | INACTIVE | Program discontinued          | 2024-04-02 10:10:00 | 2024-09-15 14:00:00 |
+
+---
+
+## 13. Student Attendance
 
 _Tracks daily attendance for students in their assigned class sections_
 
@@ -241,7 +266,7 @@ _Tracks daily attendance for students in their assigned class sections_
 
 ---
 
-## 13. Teacher Attendance
+## 14. Teacher Attendance
 
 _Tracks daily attendance for teachers_
 
