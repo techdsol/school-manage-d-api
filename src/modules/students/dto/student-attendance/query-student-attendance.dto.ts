@@ -1,12 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsEnum, IsDateString, IsUUID, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
 import { StudentAttendanceStatus } from '../../entities/student-attendance.entity';
 
 export class QueryStudentAttendanceDto {
-  @ApiProperty({ required: false, description: 'Filter by student assignment ID' })
+  @ApiProperty({ required: false, description: 'Filter by timetable ID' })
   @IsOptional()
   @IsUUID()
-  studentAssignmentId?: string;
+  timetableId?: string;
 
   @ApiProperty({ required: false, description: 'Filter by class section code' })
   @IsOptional()
@@ -40,9 +41,11 @@ export class QueryStudentAttendanceDto {
 
   @ApiProperty({ required: false, description: 'Page number', default: 1 })
   @IsOptional()
+  @Type(() => Number)
   page?: number;
 
   @ApiProperty({ required: false, description: 'Items per page', default: 50 })
   @IsOptional()
+  @Type(() => Number)
   limit?: number;
 }

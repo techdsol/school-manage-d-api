@@ -10,9 +10,22 @@ import { Student } from './entities/student.entity';
 import { StudentAssignment } from './entities/student-assignment.entity';
 import { StudentAttendance } from './entities/student-attendance.entity';
 import { ClassSection } from '../classes/entities/class-section.entity';
+import { Timetable } from '../classes/entities/timetable.entity';
+import { Class } from '../classes/entities/class.entity';
+import { ClassType } from '../classes/entities/class-type.entity';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Student, StudentAssignment, StudentAttendance, ClassSection])],
+  imports: [
+    SequelizeModule.forFeature([
+      Student,
+      StudentAssignment,
+      StudentAttendance,
+      ClassSection,
+      Timetable,
+      Class,
+      ClassType,
+    ]),
+  ],
   controllers: [StudentsController, StudentAssignmentController, StudentAttendanceController],
   providers: [StudentsService, StudentAssignmentService, StudentAttendanceService],
   exports: [StudentsService, StudentAssignmentService, StudentAttendanceService],

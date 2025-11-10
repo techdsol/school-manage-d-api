@@ -64,7 +64,8 @@ export class StudentAttendanceController {
   @Get('stats')
   @ApiOperation({ summary: 'Get attendance statistics' })
   @ApiQuery({ name: 'classSectionCode', required: false })
-  @ApiQuery({ name: 'studentAssignmentId', required: false })
+  @ApiQuery({ name: 'studentId', required: false })
+  @ApiQuery({ name: 'timetableId', required: false })
   @ApiQuery({ name: 'startDate', required: false })
   @ApiQuery({ name: 'endDate', required: false })
   @ApiResponse({
@@ -73,36 +74,38 @@ export class StudentAttendanceController {
   })
   getStats(
     @Query('classSectionCode') classSectionCode?: string,
-    @Query('studentAssignmentId') studentAssignmentId?: string,
+    @Query('studentId') studentId?: string,
+    @Query('timetableId') timetableId?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
     return this.studentAttendanceService.getAttendanceStats({
       classSectionCode,
-      studentAssignmentId,
+      studentId,
+      timetableId,
       startDate,
       endDate,
     });
   }
 
-  @Get('monthly')
-  @ApiOperation({ summary: 'Get monthly attendance summary for a student' })
-  @ApiQuery({ name: 'studentAssignmentId', required: true })
-  @ApiQuery({ name: 'month', required: true })
-  @ApiQuery({ name: 'year', required: true })
+  @Get('attendance-required-periods')
+  @ApiOperation({ summary: 'Get timetable periods that require attendance' })
+  @ApiQuery({ name: 'classSectionCode', required: false })
+  @ApiQuery({ name: 'dayOfWeek', required: false })
+  @ApiQuery({ name: 'academicYear', required: false })
   @ApiResponse({
     status: 200,
-    description: 'Monthly attendance summary retrieved successfully',
+    description: 'Attendance-required periods retrieved successfully',
   })
-  getMonthly(
-    @Query('studentAssignmentId') studentAssignmentId: string,
-    @Query('month') month: string,
-    @Query('year') year: string,
+  getAttendanceRequiredPeriods(
+    @Query('classSectionCode') classSectionCode?: string,
+    @Query('dayOfWeek') dayOfWeek?: string,
+    @Query('academicYear') academicYear?: string,
   ) {
-    return this.studentAttendanceService.getMonthlyAttendance({
-      studentAssignmentId,
-      month: parseInt(month, 10),
-      year: parseInt(year, 10),
+    return this.studentAttendanceService.getAttendanceRequiredPeriods({
+      classSectionCode,
+      dayOfWeek,
+      academicYear,
     });
   }
 

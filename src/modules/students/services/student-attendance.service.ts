@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { StudentAttendance } from '../entities/student-attendance.entity';
-import { StudentAssignment } from '../entities/student-assignment.entity';
 import { Student } from '../entities/student.entity';
+import { Timetable } from '../../classes/entities/timetable.entity';
 import { ClassSection } from '../../classes/entities/class-section.entity';
+import { Class } from '../../classes/entities/class.entity';
+import { ClassType } from '../../classes/entities/class-type.entity';
+import { Subject } from '../../subjects/entities/subject.entity';
+import { Teacher } from '../../teachers/entities/teacher.entity';
 import { CreateStudentAttendanceDto } from '../dto/student-attendance/create-student-attendance.dto';
 import { UpdateStudentAttendanceDto } from '../dto/student-attendance/update-student-attendance.dto';
 import { BulkCreateStudentAttendanceDto } from '../dto/student-attendance/bulk-create-student-attendance.dto';
@@ -15,25 +19,48 @@ export class StudentAttendanceService {
   constructor(
     @InjectModel(StudentAttendance)
     private studentAttendanceModel: typeof StudentAttendance,
-    @InjectModel(StudentAssignment)
-    private studentAssignmentModel: typeof StudentAssignment,
+    @InjectModel(Timetable)
+    private timetableModel: typeof Timetable,
+    @InjectModel(Student)
+    private studentModel: typeof Student,
   ) { }
 
   async create(createStudentAttendanceDto: CreateStudentAttendanceDto): Promise<StudentAttendance> {
-    // Validate student assignment exists and is active
-    const studentAssignment = await this.studentAssignmentModel.findByPk(
-      createStudentAttendanceDto.studentAssignmentId,
+    // Validate timetable entry exists and requires attendance
+    const timetable = await this.timetableModel.findByPk(
+      createStudentAttendanceDto.timetableId,
+      {
+        include: [
+          {
+            model: ClassSection,
+            include: [
+              {
+                model: Class,
+                include: [ClassType],
+              },
+            ],
+          },
+        ],
+      },
     );
 
-    if (!studentAssignment) {
+    if (!timetable) {
       throw new NotFoundException(
-        `Student assignment with ID ${createStudentAttendanceDto.studentAssignmentId} not found`,
+        `Timetable entry with ID ${createStudentAttendanceDto.timetableId} not found`,
       );
     }
 
-    if (studentAssignment.status !== 'ACTIVE') {
+    if (!timetable.requiresAttendance) {
       throw new BadRequestException(
-        'Cannot mark attendance for inactive student assignment',
+        'This timetable entry does not require attendance tracking',
+      );
+    }
+
+    // Validate student exists
+    const student = await this.studentModel.findByPk(createStudentAttendanceDto.studentId);
+    if (!student) {
+      throw new NotFoundException(
+        `Student with ID ${createStudentAttendanceDto.studentId} not found`,
       );
     }
 
@@ -46,23 +73,52 @@ export class StudentAttendanceService {
       throw new BadRequestException('Cannot mark attendance for future dates');
     }
 
-    // Check for duplicate attendance
-    const existingAttendance = await this.studentAttendanceModel.findOne({
-      where: {
-        studentAssignmentId: createStudentAttendanceDto.studentAssignmentId,
-        attendanceDate: createStudentAttendanceDto.attendanceDate,
-      },
-    });
+    // Get class type to determine validation rules
+    const classType = timetable.classSection?.classDetails?.classTypeDetails?.code;
 
-    if (existingAttendance) {
-      throw new ConflictException(
-        'Attendance already marked for this student on this date',
-      );
+    // Check for duplicate attendance based on class type
+    if (classType === 'CURR') {
+      // For curricular: check if attendance already exists on this date for this student in this section
+      const existingAttendance = await this.studentAttendanceModel.findOne({
+        where: {
+          studentId: createStudentAttendanceDto.studentId,
+          attendanceDate: createStudentAttendanceDto.attendanceDate,
+        },
+        include: [
+          {
+            model: Timetable,
+            where: {
+              classSectionCode: timetable.classSectionCode,
+            },
+          },
+        ],
+      });
+
+      if (existingAttendance) {
+        throw new ConflictException(
+          'Attendance already marked for this student on this date (curricular classes allow only one attendance per day)',
+        );
+      }
+    } else if (classType === 'EXTR') {
+      // For extra-curricular: check unique constraint on (timetableId + studentId)
+      const existingAttendance = await this.studentAttendanceModel.findOne({
+        where: {
+          timetableId: createStudentAttendanceDto.timetableId,
+          studentId: createStudentAttendanceDto.studentId,
+        },
+      });
+
+      if (existingAttendance) {
+        throw new ConflictException(
+          'Attendance already marked for this student in this timetable entry',
+        );
+      }
     }
 
     // Create attendance record
     const attendanceData: any = {
-      studentAssignmentId: createStudentAttendanceDto.studentAssignmentId,
+      timetableId: createStudentAttendanceDto.timetableId,
+      studentId: createStudentAttendanceDto.studentId,
       attendanceDate: createStudentAttendanceDto.attendanceDate,
       status: createStudentAttendanceDto.status,
       checkInTime: createStudentAttendanceDto.checkInTime,
@@ -75,6 +131,36 @@ export class StudentAttendanceService {
   }
 
   async bulkCreate(bulkCreateDto: BulkCreateStudentAttendanceDto): Promise<StudentAttendance[]> {
+    // Validate timetable entry exists and requires attendance
+    const timetable = await this.timetableModel.findByPk(
+      bulkCreateDto.timetableId,
+      {
+        include: [
+          {
+            model: ClassSection,
+            include: [
+              {
+                model: Class,
+                include: [ClassType],
+              },
+            ],
+          },
+        ],
+      },
+    );
+
+    if (!timetable) {
+      throw new NotFoundException(
+        `Timetable entry with ID ${bulkCreateDto.timetableId} not found`,
+      );
+    }
+
+    if (!timetable.requiresAttendance) {
+      throw new BadRequestException(
+        'This timetable entry does not require attendance tracking',
+      );
+    }
+
     // Validate date is not in the future
     const attendanceDate = new Date(bulkCreateDto.attendanceDate);
     const today = new Date();
@@ -84,48 +170,64 @@ export class StudentAttendanceService {
       throw new BadRequestException('Cannot mark attendance for future dates');
     }
 
-    // Validate all student assignments exist and are active
-    const studentAssignmentIds = bulkCreateDto.attendances.map(
-      (a) => a.studentAssignmentId,
-    );
-
-    const studentAssignments = await this.studentAssignmentModel.findAll({
+    // Validate all students exist
+    const studentIds = bulkCreateDto.attendances.map((a) => a.studentId);
+    const students = await this.studentModel.findAll({
       where: {
-        id: studentAssignmentIds,
+        id: studentIds,
       },
     });
 
-    if (studentAssignments.length !== studentAssignmentIds.length) {
-      throw new NotFoundException('One or more student assignments not found');
+    if (students.length !== studentIds.length) {
+      throw new NotFoundException('One or more students not found');
     }
 
-    const inactiveAssignments = studentAssignments.filter(
-      (sa) => sa.status !== 'ACTIVE',
-    );
+    // Get class type to determine validation rules
+    const classType = timetable.classSection?.classDetails?.classTypeDetails?.code;
 
-    if (inactiveAssignments.length > 0) {
-      throw new BadRequestException(
-        'Cannot mark attendance for inactive student assignments',
-      );
-    }
+    // Check for existing attendance based on class type
+    if (classType === 'CURR') {
+      // For curricular: check if any student already has attendance on this date in this section
+      const existingAttendance = await this.studentAttendanceModel.findAll({
+        where: {
+          studentId: studentIds,
+          attendanceDate: bulkCreateDto.attendanceDate,
+        },
+        include: [
+          {
+            model: Timetable,
+            where: {
+              classSectionCode: timetable.classSectionCode,
+            },
+          },
+        ],
+      });
 
-    // Check for existing attendance records
-    const existingAttendance = await this.studentAttendanceModel.findAll({
-      where: {
-        studentAssignmentId: studentAssignmentIds,
-        attendanceDate: bulkCreateDto.attendanceDate,
-      },
-    });
+      if (existingAttendance.length > 0) {
+        throw new ConflictException(
+          `Attendance already exists for ${existingAttendance.length} student(s) on this date`,
+        );
+      }
+    } else if (classType === 'EXTR') {
+      // For extra-curricular: check unique constraint on (timetableId + studentId)
+      const existingAttendance = await this.studentAttendanceModel.findAll({
+        where: {
+          timetableId: bulkCreateDto.timetableId,
+          studentId: studentIds,
+        },
+      });
 
-    if (existingAttendance.length > 0) {
-      throw new ConflictException(
-        `Attendance already exists for ${existingAttendance.length} student(s) on this date`,
-      );
+      if (existingAttendance.length > 0) {
+        throw new ConflictException(
+          `Attendance already marked for ${existingAttendance.length} student(s) in this timetable entry`,
+        );
+      }
     }
 
     // Create all attendance records
     const attendanceRecords: any[] = bulkCreateDto.attendances.map((attendance) => ({
-      studentAssignmentId: attendance.studentAssignmentId,
+      timetableId: bulkCreateDto.timetableId,
+      studentId: attendance.studentId,
       attendanceDate: bulkCreateDto.attendanceDate,
       status: attendance.status,
       checkInTime: attendance.checkInTime,
@@ -150,8 +252,12 @@ export class StudentAttendanceService {
     const where: any = {};
 
     // Build query filters
-    if (queryDto.studentAssignmentId) {
-      where.studentAssignmentId = queryDto.studentAssignmentId;
+    if (queryDto.timetableId) {
+      where.timetableId = queryDto.timetableId;
+    }
+
+    if (queryDto.studentId) {
+      where.studentId = queryDto.studentId;
     }
 
     if (queryDto.attendanceDate) {
@@ -176,34 +282,40 @@ export class StudentAttendanceService {
       where.status = queryDto.status;
     }
 
-    // Build include filters for student assignment
+    // Build include filters
     const include: any = [
       {
-        model: StudentAssignment,
-        as: 'studentAssignment',
+        model: Timetable,
         include: [
           {
-            model: Student,
-            as: 'student',
+            model: ClassSection,
+            include: [
+              {
+                model: Class,
+                include: [ClassType],
+              },
+            ],
           },
           {
-            model: ClassSection,
-            as: 'classSection',
+            model: Subject,
+          },
+          {
+            model: Teacher,
           },
         ],
       },
+      {
+        model: Student,
+      },
+      {
+        model: Teacher,
+        as: 'teacher',
+      },
     ];
 
-    // Add filters through associations if needed
-    if (queryDto.studentId) {
-      include[0].where = { studentId: queryDto.studentId };
-    }
-
+    // Add filter for class section code if provided
     if (queryDto.classSectionCode) {
-      include[0].where = {
-        ...include[0].where,
-        classSectionCode: queryDto.classSectionCode,
-      };
+      include[0].where = { classSectionCode: queryDto.classSectionCode };
     }
 
     const { rows, count } = await this.studentAttendanceModel.findAndCountAll({
@@ -226,18 +338,31 @@ export class StudentAttendanceService {
     const attendance = await this.studentAttendanceModel.findByPk(id, {
       include: [
         {
-          model: StudentAssignment,
-          as: 'studentAssignment',
+          model: Timetable,
           include: [
             {
-              model: Student,
-              as: 'student',
+              model: ClassSection,
+              include: [
+                {
+                  model: Class,
+                  include: [ClassType],
+                },
+              ],
             },
             {
-              model: ClassSection,
-              as: 'classSection',
+              model: Subject,
+            },
+            {
+              model: Teacher,
             },
           ],
+        },
+        {
+          model: Student,
+        },
+        {
+          model: Teacher,
+          as: 'teacher',
         },
       ],
     });
@@ -276,7 +401,8 @@ export class StudentAttendanceService {
 
   async getAttendanceStats(query: {
     classSectionCode?: string;
-    studentAssignmentId?: string;
+    studentId?: string;
+    timetableId?: string;
     startDate?: string;
     endDate?: string;
   }): Promise<any> {
@@ -296,16 +422,19 @@ export class StudentAttendanceService {
       };
     }
 
-    if (query.studentAssignmentId) {
-      where.studentAssignmentId = query.studentAssignmentId;
+    if (query.studentId) {
+      where.studentId = query.studentId;
+    }
+
+    if (query.timetableId) {
+      where.timetableId = query.timetableId;
     }
 
     const include: any = [];
 
     if (query.classSectionCode) {
       include.push({
-        model: StudentAssignment,
-        as: 'studentAssignment',
+        model: Timetable,
         where: { classSectionCode: query.classSectionCode },
       });
     }
@@ -351,40 +480,47 @@ export class StudentAttendanceService {
     return stats;
   }
 
-  async getMonthlyAttendance(query: {
-    studentAssignmentId: string;
-    month: number;
-    year: number;
-  }): Promise<any> {
-    const startDate = new Date(query.year, query.month - 1, 1);
-    const endDate = new Date(query.year, query.month, 0);
-
-    const attendanceRecords = await this.studentAttendanceModel.findAll({
-      where: {
-        studentAssignmentId: query.studentAssignmentId,
-        attendanceDate: {
-          [Op.between]: [startDate, endDate],
-        },
-      },
-      order: [['attendanceDate', 'ASC']],
-    });
-
-    const totalDays = attendanceRecords.length;
-    const presentDays = attendanceRecords.filter(
-      (r) => r.status === 'PRESENT' || r.status === 'LATE',
-    ).length;
-
-    const percentage = totalDays > 0 ? (presentDays / totalDays) * 100 : 0;
-
-    return {
-      studentAssignmentId: query.studentAssignmentId,
-      month: query.month,
-      year: query.year,
-      totalDays,
-      presentDays,
-      absentDays: totalDays - presentDays,
-      attendancePercentage: Math.round(percentage * 100) / 100,
-      records: attendanceRecords,
+  async getAttendanceRequiredPeriods(query: {
+    classSectionCode?: string;
+    dayOfWeek?: string;
+    academicYear?: string;
+  }): Promise<Timetable[]> {
+    const where: any = {
+      requiresAttendance: true,
     };
+
+    if (query.classSectionCode) {
+      where.classSectionCode = query.classSectionCode;
+    }
+
+    if (query.dayOfWeek) {
+      where.dayOfWeek = query.dayOfWeek;
+    }
+
+    if (query.academicYear) {
+      where.academicYear = query.academicYear;
+    }
+
+    return this.timetableModel.findAll({
+      where,
+      include: [
+        {
+          model: ClassSection,
+          include: [
+            {
+              model: Class,
+              include: [ClassType],
+            },
+          ],
+        },
+        {
+          model: Subject,
+        },
+        {
+          model: Teacher,
+        },
+      ],
+      order: [['dayOfWeek', 'ASC'], ['startTime', 'ASC']],
+    });
   }
 }

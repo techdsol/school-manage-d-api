@@ -3,10 +3,15 @@ import { IsUUID, IsEnum, IsDateString, IsOptional, IsString, IsNotEmpty } from '
 import { StudentAttendanceStatus } from '../../entities/student-attendance.entity';
 
 export class CreateStudentAttendanceDto {
-  @ApiProperty({ description: 'Student assignment ID' })
+  @ApiProperty({ description: 'Timetable entry ID' })
   @IsUUID()
   @IsNotEmpty()
-  studentAssignmentId: string;
+  timetableId: string;
+
+  @ApiProperty({ description: 'Student ID' })
+  @IsUUID()
+  @IsNotEmpty()
+  studentId: string;
 
   @ApiProperty({ description: 'Attendance date (YYYY-MM-DD)' })
   @IsDateString()

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsEnum, IsOptional, IsInt, Min, Matches } from 'class-validator';
+import { IsNotEmpty, IsString, IsEnum, IsOptional, IsInt, Min, Matches, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { DayOfWeek, PeriodType, TimetableStatus } from '../../entities/timetable.entity';
 
@@ -64,6 +64,11 @@ export class CreateTimetableDto {
   @IsOptional()
   @IsEnum(TimetableStatus)
   status?: TimetableStatus;
+
+  @ApiPropertyOptional({ description: 'Whether this period requires attendance tracking', default: false })
+  @IsOptional()
+  @IsBoolean()
+  requiresAttendance?: boolean;
 
   @ApiPropertyOptional({ description: 'Additional notes' })
   @IsOptional()

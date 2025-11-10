@@ -160,6 +160,13 @@ export class Timetable extends Model<Timetable> {
   status: TimetableStatus;
 
   @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+    defaultValue: false,
+  })
+  requiresAttendance: boolean;
+
+  @Column({
     type: DataType.TEXT,
     allowNull: true,
   })

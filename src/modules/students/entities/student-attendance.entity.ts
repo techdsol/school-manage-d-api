@@ -1,7 +1,8 @@
 import { Column, Model, Table, DataType, PrimaryKey, Default, ForeignKey, BelongsTo, Index } from 'sequelize-typescript';
 import { ApiProperty } from '@nestjs/swagger';
-import { StudentAssignment } from './student-assignment.entity';
+import { Student } from './student.entity';
 import { Teacher } from '../../teachers/entities/teacher.entity';
+import { Timetable } from '../../classes/entities/timetable.entity';
 
 export enum StudentAttendanceStatus {
   PRESENT = 'PRESENT',
@@ -18,8 +19,12 @@ export enum StudentAttendanceStatus {
   indexes: [
     {
       unique: true,
-      fields: ['studentAssignmentId', 'attendanceDate'],
-      name: 'unique_student_attendance_per_day',
+      fields: ['timetableId', 'studentId'],
+      name: 'unique_student_attendance_per_timetable',
+    },
+    {
+      fields: ['studentId', 'attendanceDate'],
+      name: 'idx_student_attendance_student_date',
     },
     {
       fields: ['attendanceDate'],
@@ -28,6 +33,10 @@ export enum StudentAttendanceStatus {
     {
       fields: ['status'],
       name: 'idx_student_attendance_status',
+    },
+    {
+      fields: ['timetableId'],
+      name: 'idx_student_attendance_timetable',
     },
   ],
 })
@@ -39,12 +48,20 @@ export class StudentAttendance extends Model<StudentAttendance> {
   id: string;
 
   @ApiProperty()
-  @ForeignKey(() => StudentAssignment)
+  @ForeignKey(() => Timetable)
   @Column({
     type: DataType.UUID,
     allowNull: false,
   })
-  studentAssignmentId: string;
+  timetableId: string;
+
+  @ApiProperty()
+  @ForeignKey(() => Student)
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+  })
+  studentId: string;
 
   @ApiProperty()
   @Column({
@@ -89,8 +106,11 @@ export class StudentAttendance extends Model<StudentAttendance> {
   })
   markedBy: string;
 
-  @BelongsTo(() => StudentAssignment, 'studentAssignmentId')
-  studentAssignment: StudentAssignment;
+  @BelongsTo(() => Timetable, 'timetableId')
+  timetable: Timetable;
+
+  @BelongsTo(() => Student, 'studentId')
+  student: Student;
 
   @BelongsTo(() => Teacher, 'markedBy')
   teacher: Teacher;
