@@ -336,4 +336,50 @@ export class TeacherAttendanceService {
       records: attendanceRecords,
     };
   }
+
+  async getTeachersForAttendance(date?: string): Promise<any> {
+    const attendanceDate = date || new Date().toISOString().split('T')[0];
+
+    // Get all teachers
+    const teachers = await this.teacherModel.findAll({
+      order: [['name', 'ASC']],
+    });
+
+    // Get attendance for each teacher on the specified date
+    const teachersWithAttendance = await Promise.all(
+      teachers.map(async (teacher) => {
+        const attendance = await this.teacherAttendanceModel.findOne({
+          where: {
+            teacherId: teacher.id,
+            attendanceDate,
+          },
+        });
+
+        return {
+          id: teacher.id,
+          name: teacher.name,
+          phone: teacher.phone,
+          attendance: attendance
+            ? {
+                id: attendance.id,
+                status: attendance.status,
+                checkInTime: attendance.checkInTime,
+                checkOutTime: attendance.checkOutTime,
+                notes: attendance.notes,
+              }
+            : null,
+        };
+      }),
+    );
+
+    return {
+      date: attendanceDate,
+      totalTeachers: teachers.length,
+      marked: teachersWithAttendance.filter((t) => t.attendance).length,
+      unmarked: teachersWithAttendance.filter((t) => !t.attendance).length,
+      present: teachersWithAttendance.filter((t) => t.attendance?.status === 'PRESENT').length,
+      absent: teachersWithAttendance.filter((t) => t.attendance?.status === 'ABSENT').length,
+      teachers: teachersWithAttendance,
+    };
+  }
 }

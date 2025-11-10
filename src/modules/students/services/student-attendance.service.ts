@@ -523,4 +523,200 @@ export class StudentAttendanceService {
       order: [['dayOfWeek', 'ASC'], ['startTime', 'ASC']],
     });
   }
+
+  async getStudentsForAttendance(
+    timetableId: string,
+    date?: string,
+  ): Promise<any> {
+    // Get timetable entry with class section details
+    const timetable = await this.timetableModel.findByPk(timetableId, {
+      include: [
+        {
+          model: ClassSection,
+          include: [
+            {
+              model: Class,
+              include: [ClassType],
+            },
+          ],
+        },
+        {
+          model: Subject,
+        },
+        {
+          model: Teacher,
+        },
+      ],
+    });
+
+    if (!timetable) {
+      throw new NotFoundException(`Timetable entry with ID ${timetableId} not found`);
+    }
+
+    if (!timetable.requiresAttendance) {
+      throw new BadRequestException('This timetable entry does not require attendance');
+    }
+
+    // Get all students enrolled in this class section
+    const studentAssignments = await this.studentModel.sequelize.models.StudentAssignment.findAll({
+      where: {
+        classSectionCode: timetable.classSectionCode,
+        status: 'ACTIVE',
+      },
+      include: [
+        {
+          model: this.studentModel,
+          as: 'student',
+        },
+      ],
+    });
+
+    // If date is provided, get attendance status for each student
+    const attendanceDate = date || new Date().toISOString().split('T')[0];
+    const students = await Promise.all(
+      studentAssignments.map(async (assignment: any) => {
+        const attendance = await this.studentAttendanceModel.findOne({
+          where: {
+            timetableId,
+            studentId: assignment.student.id,
+            attendanceDate,
+          },
+        });
+
+        return {
+          id: assignment.student.id,
+          name: assignment.student.name,
+          phone: assignment.student.phone,
+          assignmentId: assignment.id,
+          attendance: attendance
+            ? {
+                id: attendance.id,
+                status: attendance.status,
+                checkInTime: attendance.checkInTime,
+                checkOutTime: attendance.checkOutTime,
+                notes: attendance.notes,
+              }
+            : null,
+        };
+      }),
+    );
+
+    return {
+      timetable: {
+        id: timetable.id,
+        classSectionCode: timetable.classSectionCode,
+        classSection: timetable.classSection,
+        subject: timetable.subject,
+        teacher: timetable.teacher,
+        dayOfWeek: timetable.dayOfWeek,
+        startTime: timetable.startTime,
+        endTime: timetable.endTime,
+        periodNumber: timetable.periodNumber,
+        periodType: timetable.periodType,
+        room: timetable.room,
+      },
+      date: attendanceDate,
+      students,
+      summary: {
+        total: students.length,
+        marked: students.filter((s) => s.attendance).length,
+        unmarked: students.filter((s) => !s.attendance).length,
+        present: students.filter((s) => s.attendance?.status === 'PRESENT').length,
+        absent: students.filter((s) => s.attendance?.status === 'ABSENT').length,
+        late: students.filter((s) => s.attendance?.status === 'LATE').length,
+      },
+    };
+  }
+
+  async getUnmarkedAttendance(query: {
+    date?: string;
+    classSectionCode?: string;
+  }): Promise<any> {
+    const attendanceDate = query.date || new Date().toISOString().split('T')[0];
+    const dayOfWeek = new Date(attendanceDate)
+      .toLocaleDateString('en-US', { weekday: 'long' })
+      .toUpperCase();
+
+    // Get timetable entries that require attendance for the specified date
+    const where: any = {
+      requiresAttendance: true,
+      dayOfWeek,
+      status: 'ACTIVE',
+    };
+
+    if (query.classSectionCode) {
+      where.classSectionCode = query.classSectionCode;
+    }
+
+    const timetableEntries = await this.timetableModel.findAll({
+      where,
+      include: [
+        {
+          model: ClassSection,
+          include: [
+            {
+              model: Class,
+              include: [ClassType],
+            },
+          ],
+        },
+        {
+          model: Subject,
+        },
+        {
+          model: Teacher,
+        },
+      ],
+      order: [['startTime', 'ASC']],
+    });
+
+    // For each timetable entry, check attendance status
+    const unmarkedPeriods = await Promise.all(
+      timetableEntries.map(async (timetable) => {
+        // Count students in class section
+        const studentCount = await this.studentModel.sequelize.models.StudentAssignment.count({
+          where: {
+            classSectionCode: timetable.classSectionCode,
+            status: 'ACTIVE',
+          },
+        });
+
+        // Count marked attendance for this period
+        const markedCount = await this.studentAttendanceModel.count({
+          where: {
+            timetableId: timetable.id,
+            attendanceDate,
+          },
+        });
+
+        return {
+          timetable: {
+            id: timetable.id,
+            classSectionCode: timetable.classSectionCode,
+            classSection: timetable.classSection,
+            subject: timetable.subject,
+            teacher: timetable.teacher,
+            startTime: timetable.startTime,
+            endTime: timetable.endTime,
+            periodNumber: timetable.periodNumber,
+            periodType: timetable.periodType,
+            room: timetable.room,
+          },
+          studentCount,
+          markedCount,
+          unmarkedCount: studentCount - markedCount,
+          isComplete: studentCount === markedCount,
+        };
+      }),
+    );
+
+    return {
+      date: attendanceDate,
+      dayOfWeek,
+      totalPeriods: unmarkedPeriods.length,
+      completedPeriods: unmarkedPeriods.filter((p) => p.isComplete).length,
+      pendingPeriods: unmarkedPeriods.filter((p) => !p.isComplete).length,
+      periods: unmarkedPeriods,
+    };
+  }
 }

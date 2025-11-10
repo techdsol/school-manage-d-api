@@ -82,6 +82,17 @@ export class TeacherAttendanceController {
     });
   }
 
+  @Get('list-for-marking')
+  @ApiOperation({ summary: 'Get all teachers with their attendance status for today' })
+  @ApiQuery({ name: 'date', required: false, description: 'Date to check (YYYY-MM-DD), defaults to today' })
+  @ApiResponse({
+    status: 200,
+    description: 'Teachers list with attendance status retrieved successfully',
+  })
+  getTeachersForAttendance(@Query('date') date?: string) {
+    return this.teacherAttendanceService.getTeachersForAttendance(date);
+  }
+
   @Get('monthly')
   @ApiOperation({ summary: 'Get monthly attendance summary for a teacher' })
   @ApiQuery({ name: 'teacherId', required: true })

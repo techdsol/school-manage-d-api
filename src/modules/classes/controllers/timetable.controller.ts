@@ -52,6 +52,18 @@ export class TimetableController {
     return this.timetableService.findAll(query);
   }
 
+  @Get('today')
+  @ApiOperation({ summary: "Get today's timetable periods requiring attendance" })
+  @ApiQuery({ name: 'classSectionCode', required: false, description: 'Filter by class section' })
+  @ApiQuery({ name: 'academicYear', required: false, description: 'Academic year' })
+  @ApiResponse({ status: 200, description: "Today's timetable retrieved successfully" })
+  getTodaySchedule(
+    @Query('classSectionCode') classSectionCode?: string,
+    @Query('academicYear') academicYear?: string,
+  ) {
+    return this.timetableService.getTodaySchedule({ classSectionCode, academicYear });
+  }
+
   @Get('class/:code/weekly')
   @ApiOperation({ summary: 'Get weekly schedule for a class section' })
   @ApiParam({ name: 'code', description: 'Class section code' })

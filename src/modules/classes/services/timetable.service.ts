@@ -2,6 +2,8 @@ import { Injectable, NotFoundException, BadRequestException, ConflictException }
 import { InjectModel } from '@nestjs/sequelize';
 import { Timetable, DayOfWeek, TimetableStatus } from '../entities/timetable.entity';
 import { ClassSection } from '../entities/class-section.entity';
+import { Class } from '../entities/class.entity';
+import { ClassType } from '../entities/class-type.entity';
 import { Subject } from '../../subjects/entities/subject.entity';
 import { Teacher } from '../../teachers/entities/teacher.entity';
 import { CreateTimetableDto } from '../dto/timetable/create-timetable.dto';
@@ -677,5 +679,61 @@ export class TimetableService {
 
     const conflictingPeriod = await this.timetableModel.findOne({ where });
     return !!conflictingPeriod;
+  }
+
+  async getTodaySchedule(query: {
+    classSectionCode?: string;
+    academicYear?: string;
+  }): Promise<any> {
+    const today = new Date();
+    const dayOfWeek = today
+      .toLocaleDateString('en-US', { weekday: 'long' })
+      .toUpperCase() as DayOfWeek;
+
+    const where: any = {
+      dayOfWeek,
+      requiresAttendance: true,
+      status: TimetableStatus.ACTIVE,
+    };
+
+    if (query.classSectionCode) {
+      where.classSectionCode = query.classSectionCode;
+    }
+
+    if (query.academicYear) {
+      where.academicYear = query.academicYear;
+    }
+
+    const timetables = await this.timetableModel.findAll({
+      where,
+      include: [
+        {
+          model: ClassSection,
+          as: 'classSection',
+          include: [
+            {
+              model: Class,
+              as: 'classDetails',
+              include: [
+                {
+                  model: ClassType,
+                  as: 'classTypeDetails',
+                },
+              ],
+            },
+          ],
+        },
+        { model: Subject, as: 'subject' },
+        { model: Teacher, as: 'teacher' },
+      ],
+      order: [['startTime', 'ASC']],
+    });
+
+    return {
+      date: today.toISOString().split('T')[0],
+      dayOfWeek,
+      totalPeriods: timetables.length,
+      periods: timetables,
+    };
   }
 }

@@ -56,7 +56,7 @@ export class StudentAssignmentService {
       include: [
         {
           model: Student,
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'name', 'phone'],
         },
         {
           model: ClassSection,
@@ -72,7 +72,7 @@ export class StudentAssignmentService {
       include: [
         {
           model: Student,
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'name', 'phone'],
         },
         {
           model: ClassSection,
@@ -87,7 +87,7 @@ export class StudentAssignmentService {
       include: [
         {
           model: Student,
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'name', 'phone'],
         },
         {
           model: ClassSection,
@@ -114,7 +114,7 @@ export class StudentAssignmentService {
       include: [
         {
           model: Student,
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'name', 'phone'],
         },
         {
           model: ClassSection,
@@ -135,7 +135,7 @@ export class StudentAssignmentService {
       include: [
         {
           model: Student,
-          attributes: ['id', 'name', 'email'],
+          attributes: ['id', 'name', 'phone'],
         },
         {
           model: ClassSection,
@@ -143,6 +143,46 @@ export class StudentAssignmentService {
         },
       ],
     });
+  }
+
+  async findActiveStudentsByClassSection(classSectionCode: string): Promise<any> {
+    const classSection = await this.classSectionModel.findByPk(classSectionCode);
+    if (!classSection) {
+      throw new NotFoundException(`Class section with code ${classSectionCode} not found`);
+    }
+
+    const assignments = await this.studentAssignmentModel.findAll({
+      where: { 
+        classSectionCode,
+        status: 'ACTIVE',
+      },
+      include: [
+        {
+          model: Student,
+          as: 'student',
+        },
+        {
+          model: ClassSection,
+          as: 'classSection',
+        },
+      ],
+      order: [
+        [{ model: Student, as: 'student' }, 'name', 'ASC'],
+      ],
+    });
+
+    return {
+      classSection,
+      totalStudents: assignments.length,
+      students: assignments.map(a => ({
+        id: a.student.id,
+        name: a.student.name,
+        phone: a.student.phone,
+        assignmentId: a.id,
+        assignmentStatus: a.status,
+        notes: a.notes,
+      })),
+    };
   }
 
   async update(id: string, updateStudentAssignmentDto: UpdateStudentAssignmentDto): Promise<StudentAssignment> {

@@ -109,6 +109,35 @@ export class StudentAttendanceController {
     });
   }
 
+  @Get('timetable/:timetableId/students')
+  @ApiOperation({ summary: 'Get students enrolled in class for marking attendance' })
+  @ApiQuery({ name: 'date', required: false, description: 'Date to check attendance status (YYYY-MM-DD)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Students list retrieved successfully with attendance status',
+  })
+  getStudentsForAttendance(
+    @Param('timetableId') timetableId: string,
+    @Query('date') date?: string,
+  ) {
+    return this.studentAttendanceService.getStudentsForAttendance(timetableId, date);
+  }
+
+  @Get('unmarked')
+  @ApiOperation({ summary: 'Get unmarked attendance periods' })
+  @ApiQuery({ name: 'date', required: false, description: 'Date to check (YYYY-MM-DD), defaults to today' })
+  @ApiQuery({ name: 'classSectionCode', required: false })
+  @ApiResponse({
+    status: 200,
+    description: 'Unmarked attendance periods retrieved successfully',
+  })
+  getUnmarkedAttendance(
+    @Query('date') date?: string,
+    @Query('classSectionCode') classSectionCode?: string,
+  ) {
+    return this.studentAttendanceService.getUnmarkedAttendance({ date, classSectionCode });
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get attendance record by ID' })
   @ApiResponse({
