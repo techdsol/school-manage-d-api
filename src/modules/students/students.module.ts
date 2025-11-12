@@ -10,7 +10,7 @@ import { Student } from './entities/student.entity';
 import { StudentAssignment } from './entities/student-assignment.entity';
 import { StudentAttendance } from './entities/student-attendance.entity';
 import { ClassSection } from '../classes/entities/class-section.entity';
-import { Timetable } from '../classes/entities/timetable.entity';
+import { Timetable } from '../timetable/entities/timetable.entity';
 import { Class } from '../classes/entities/class.entity';
 import { ClassType } from '../classes/entities/class-type.entity';
 

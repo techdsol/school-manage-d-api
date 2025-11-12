@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, ConflictException }
 import { InjectModel } from '@nestjs/sequelize';
 import { StudentAttendance } from '../entities/student-attendance.entity';
 import { Student } from '../entities/student.entity';
-import { Timetable } from '../../classes/entities/timetable.entity';
+import { Timetable } from '../../timetable/entities/timetable.entity';
 import { ClassSection } from '../../classes/entities/class-section.entity';
 import { Class } from '../../classes/entities/class.entity';
 import { ClassType } from '../../classes/entities/class-type.entity';

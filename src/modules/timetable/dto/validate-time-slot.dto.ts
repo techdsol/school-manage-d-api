@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsString, IsEnum, IsOptional, Matches } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { DayOfWeek } from '../../entities/timetable.entity';
+import { DayOfWeek } from '../entities/timetable.entity';
 
 export class ValidateTimeSlotDto {
   @ApiProperty({ description: 'Class section code' })

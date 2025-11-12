@@ -1,7 +1,7 @@
 import { IsOptional, IsString, IsEnum, IsInt, Min } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { DayOfWeek, PeriodType, TimetableStatus } from '../../entities/timetable.entity';
+import { DayOfWeek, PeriodType, TimetableStatus } from '../entities/timetable.entity';
 
 export class QueryTimetableDto {
   @ApiPropertyOptional({ description: 'Class section code' })

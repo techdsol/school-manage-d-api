@@ -7,7 +7,7 @@ import {
   BelongsTo,
   Index,
 } from 'sequelize-typescript';
-import { ClassSection } from './class-section.entity';
+import { ClassSection } from '../../classes/entities/class-section.entity';
 import { Subject } from '../../subjects/entities/subject.entity';
 import { Teacher } from '../../teachers/entities/teacher.entity';
 

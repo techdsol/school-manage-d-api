@@ -11,7 +11,6 @@ The system manages:
 - **Class Types** - Types of classes (Curricular, Extra Curricular)
 - **Classes** - Specific classes/grades (depends on class types)
 - **Class Sections** - Specific sections within classes for academic years (depends on classes + academic years)
-- **Grades** - Grade/standard levels for academic progression (independent)
 - **Teachers** - Teacher information (can be assigned to sections)
 - **Students** - Student information (can be assigned to sections)
 - **Student Assignments** - Assignment of students to specific class sections (depends on students + class sections)
@@ -134,28 +133,7 @@ _Independent entity - can be assigned to teach class sections_
 
 ---
 
-## 7. Grades
-
-_Independent entity - grade/standard levels for academic progression_
-
-| code | name     | createdAt           | updatedAt           |
-| ---- | -------- | ------------------- | ------------------- |
-| GR1  | Grade 1  | 2024-01-01 10:00:00 | 2024-01-01 10:00:00 |
-| GR2  | Grade 2  | 2024-01-01 10:00:00 | 2024-01-01 10:00:00 |
-| GR3  | Grade 3  | 2024-01-01 10:00:00 | 2024-01-01 10:00:00 |
-| GR4  | Grade 4  | 2024-01-01 10:00:00 | 2024-01-01 10:00:00 |
-| GR5  | Grade 5  | 2024-01-01 10:00:00 | 2024-01-01 10:00:00 |
-| GR6  | Grade 6  | 2024-01-01 10:00:00 | 2024-01-01 10:00:00 |
-| GR7  | Grade 7  | 2024-01-01 10:00:00 | 2024-01-01 10:00:00 |
-| GR8  | Grade 8  | 2024-01-01 10:00:00 | 2024-01-01 10:00:00 |
-| GR9  | Grade 9  | 2024-01-01 10:00:00 | 2024-01-01 10:00:00 |
-| GR10 | Grade 10 | 2024-01-01 10:00:00 | 2024-01-01 10:00:00 |
-| GR11 | Grade 11 | 2024-01-01 10:00:00 | 2024-01-01 10:00:00 |
-| GR12 | Grade 12 | 2024-01-01 10:00:00 | 2024-01-01 10:00:00 |
-
----
-
-## 8. Students
+## 7. Students
 
 _Independent entity - can be enrolled in class sections_
 
@@ -169,7 +147,7 @@ _Independent entity - can be enrolled in class sections_
 
 ---
 
-## 9. Student Assignments
+## 8. Student Assignments
 
 _Junction entity linking Students to Class Sections - manages student assignment to specific class sections_
 
@@ -177,13 +155,13 @@ _Junction entity linking Students to Class Sections - manages student assignment
 | ------------------------------------ | ------------------------------------ | ---------------- | -------- | --------------------- | ------------------- | ------------------- |
 | 880e8400-e29b-41d4-a716-446655440001 | 550e8400-e29b-41d4-a716-446655440001 | 1A               | ACTIVE   | Regular assignment    | 2024-04-01 08:00:00 | 2024-04-01 08:00:00 |
 | 880e8400-e29b-41d4-a716-446655440002 | 550e8400-e29b-41d4-a716-446655440002 | 1A               | ACTIVE   | Regular assignment    | 2024-04-01 08:15:00 | 2024-04-01 08:15:00 |
-| 880e8400-e29b-41d4-a716-446655440003 | 550e8400-e29b-41d4-a716-446655440003 | 2B               | ACTIVE   | Promoted from Grade 1 | 2024-04-01 08:30:00 | 2024-04-01 08:30:00 |
+| 880e8400-e29b-41d4-a716-446655440003 | 550e8400-e29b-41d4-a716-446655440003 | 2B               | ACTIVE   | Promoted from Class 1 | 2024-04-01 08:30:00 | 2024-04-01 08:30:00 |
 | 880e8400-e29b-41d4-a716-446655440004 | 550e8400-e29b-41d4-a716-446655440004 | LKGA             | ACTIVE   | New admission         | 2024-04-01 08:45:00 | 2024-04-01 08:45:00 |
 | 880e8400-e29b-41d4-a716-446655440005 | 550e8400-e29b-41d4-a716-446655440005 | 10A              | INACTIVE | No longer enrolled    | 2024-04-01 09:00:00 | 2024-10-15 14:00:00 |
 
 ---
 
-## 10. Teacher Specializations
+## 9. Teacher Specializations
 
 _Junction entity linking Teachers, Classes, and Subjects - defines which teacher teaches which subject in which class_
 
@@ -202,7 +180,7 @@ _Junction entity linking Teachers, Classes, and Subjects - defines which teacher
 
 ---
 
-## 11. Class Teacher Assignments
+## 10. Class Teacher Assignments
 
 _Junction entity linking Teachers to Class Sections - defines which teacher is the primary/secondary class teacher for which class section_
 
@@ -221,7 +199,7 @@ _Junction entity linking Teachers to Class Sections - defines which teacher is t
 
 ---
 
-## 12. Class Subjects
+## 11. Class Subjects
 
 _Junction entity linking Class Sections to Subjects - defines which subjects are taught in which class sections with optional teacher assignment_
 
@@ -245,7 +223,7 @@ _Junction entity linking Class Sections to Subjects - defines which subjects are
 
 ---
 
-## 13. Timetable
+## 12. Timetable
 
 _Defines the weekly schedule for class sections - period-based scheduling that allows flexible class timings across different days_
 
@@ -267,7 +245,7 @@ _Defines the weekly schedule for class sections - period-based scheduling that a
 
 ---
 
-## 14. Student Attendance
+## 13. Student Attendance
 
 _Tracks attendance for students based on scheduled timetable entries - supports both curricular (one per day) and extra-curricular (multiple per day) attendance_
 
@@ -287,7 +265,7 @@ _Tracks attendance for students based on scheduled timetable entries - supports 
 
 ---
 
-## 15. Teacher Attendance
+## 14. Teacher Attendance
 
 _Tracks daily attendance for teachers_
 

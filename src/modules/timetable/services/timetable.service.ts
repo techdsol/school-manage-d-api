@@ -1,16 +1,16 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Timetable, DayOfWeek, TimetableStatus } from '../entities/timetable.entity';
-import { ClassSection } from '../entities/class-section.entity';
-import { Class } from '../entities/class.entity';
-import { ClassType } from '../entities/class-type.entity';
+import { ClassSection } from '../../classes/entities/class-section.entity';
+import { Class } from '../../classes/entities/class.entity';
+import { ClassType } from '../../classes/entities/class-type.entity';
 import { Subject } from '../../subjects/entities/subject.entity';
 import { Teacher } from '../../teachers/entities/teacher.entity';
-import { CreateTimetableDto } from '../dto/timetable/create-timetable.dto';
-import { UpdateTimetableDto } from '../dto/timetable/update-timetable.dto';
-import { BulkCreateMultiDayDto } from '../dto/timetable/bulk-create-multi-day.dto';
-import { QueryTimetableDto } from '../dto/timetable/query-timetable.dto';
-import { ValidateTimeSlotDto } from '../dto/timetable/validate-time-slot.dto';
+import { CreateTimetableDto } from '../dto/create-timetable.dto';
+import { UpdateTimetableDto } from '../dto/update-timetable.dto';
+import { BulkCreateMultiDayDto } from '../dto/bulk-create-multi-day.dto';
+import { QueryTimetableDto } from '../dto/query-timetable.dto';
+import { ValidateTimeSlotDto } from '../dto/validate-time-slot.dto';
 import { Op } from 'sequelize';
 
 @Injectable()

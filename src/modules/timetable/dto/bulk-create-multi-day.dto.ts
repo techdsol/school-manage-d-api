@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, IsEnum, IsOptional, IsArray, ValidateNested, IsInt, Min, Matches } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { DayOfWeek, PeriodType, TimetableStatus } from '../../entities/timetable.entity';
+import { DayOfWeek, PeriodType, TimetableStatus } from '../entities/timetable.entity';
 
 export class PeriodScheduleDto {
   @ApiProperty({ description: 'Day of the week', enum: DayOfWeek })

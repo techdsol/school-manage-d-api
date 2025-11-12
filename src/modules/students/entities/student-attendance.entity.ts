@@ -2,7 +2,7 @@ import { Column, Model, Table, DataType, PrimaryKey, Default, ForeignKey, Belong
 import { ApiProperty } from '@nestjs/swagger';
 import { Student } from './student.entity';
 import { Teacher } from '../../teachers/entities/teacher.entity';
-import { Timetable } from '../../classes/entities/timetable.entity';
+import { Timetable } from '../../timetable/entities/timetable.entity';
 
 export enum StudentAttendanceStatus {
   PRESENT = 'PRESENT',

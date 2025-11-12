@@ -12,11 +12,11 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { TimetableService } from '../services/timetable.service';
-import { CreateTimetableDto } from '../dto/timetable/create-timetable.dto';
-import { UpdateTimetableDto } from '../dto/timetable/update-timetable.dto';
-import { BulkCreateMultiDayDto } from '../dto/timetable/bulk-create-multi-day.dto';
-import { QueryTimetableDto } from '../dto/timetable/query-timetable.dto';
-import { ValidateTimeSlotDto } from '../dto/timetable/validate-time-slot.dto';
+import { CreateTimetableDto } from '../dto/create-timetable.dto';
+import { UpdateTimetableDto } from '../dto/update-timetable.dto';
+import { BulkCreateMultiDayDto } from '../dto/bulk-create-multi-day.dto';
+import { QueryTimetableDto } from '../dto/query-timetable.dto';
+import { ValidateTimeSlotDto } from '../dto/validate-time-slot.dto';
 import { DayOfWeek, TimetableStatus } from '../entities/timetable.entity';
 
 @ApiTags('Timetable')
