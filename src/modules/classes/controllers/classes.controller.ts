@@ -65,13 +65,13 @@ export class ClassesController {
     return this.classesService.findAll();
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get a class by ID' })
+  @Get(':code')
+  @ApiOperation({ summary: 'Get a class by code' })
   @ApiParam({
-    name: 'id',
+    name: 'code',
     type: 'string',
-    description: 'Class UUID',
-    example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    description: 'Class code',
+    example: 'CLS001',
   })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -82,17 +82,17 @@ export class ClassesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Class not found',
   })
-  findOne(@Param('id') id: string): Promise<Class> {
-    return this.classesService.findOne(id);
+  findOne(@Param('code') code: string): Promise<Class> {
+    return this.classesService.findOne(code);
   }
 
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update a class by ID' })
+  @Patch(':code')
+  @ApiOperation({ summary: 'Update a class by code' })
   @ApiParam({
-    name: 'id',
+    name: 'code',
     type: 'string',
-    description: 'Class UUID',
-    example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    description: 'Class code',
+    example: 'CLS001',
   })
   @ApiBody({ type: UpdateClassDto })
   @ApiResponse({
@@ -109,19 +109,19 @@ export class ClassesController {
     description: 'Invalid input data',
   })
   update(
-    @Param('id') id: string,
+    @Param('code') code: string,
     @Body(ValidationPipe) updateClassDto: UpdateClassDto,
   ): Promise<Class> {
-    return this.classesService.update(id, updateClassDto);
+    return this.classesService.update(code, updateClassDto);
   }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Delete a class by ID' })
+  @Delete(':code')
+  @ApiOperation({ summary: 'Delete a class by code' })
   @ApiParam({
-    name: 'id',
+    name: 'code',
     type: 'string',
-    description: 'Class UUID',
-    example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    description: 'Class code',
+    example: 'CLS001',
   })
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
@@ -131,8 +131,8 @@ export class ClassesController {
     status: HttpStatus.NOT_FOUND,
     description: 'Class not found',
   })
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.classesService.remove(id);
+  async remove(@Param('code') code: string): Promise<void> {
+    await this.classesService.remove(code);
   }
 
   @Get('stats/count')

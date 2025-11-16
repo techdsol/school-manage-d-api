@@ -11,7 +11,7 @@ export const getDatabaseConfig = (configService: ConfigService): SequelizeModule
     database: configService.get<string>('DB_NAME', 'school_management'),
     autoLoadModels: true,
     synchronize: true,
-    sync: { force: false, alter: true },
+    sync: { force: false, alter: false },
     logging: configService.get<string>('NODE_ENV') === 'development' ? console.log : false,
   };
 

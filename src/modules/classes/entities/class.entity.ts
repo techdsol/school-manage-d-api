@@ -9,9 +9,11 @@ import { ClassType } from './class-type.entity';
 export class Class extends Model<Class> {
   @ApiProperty()
   @PrimaryKey
-  @Default(DataType.UUIDV4)
-  @Column(DataType.UUID)
-  id: string;
+  @Column({
+    type: DataType.STRING(8),
+    allowNull: false,
+  })
+  code: string;
 
   @ApiProperty()
   @Column({
@@ -19,13 +21,6 @@ export class Class extends Model<Class> {
     allowNull: false,
   })
   name: string;
-
-  @ApiProperty()
-  @Column({
-    type: DataType.STRING(10),
-    allowNull: false,
-  })
-  section: string;
 
   @ApiProperty()
   @ForeignKey(() => ClassType)

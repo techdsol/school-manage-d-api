@@ -1,5 +1,7 @@
-import { Column, Model, Table, DataType, PrimaryKey, Default } from 'sequelize-typescript';
+import { Column, Model, Table, DataType, PrimaryKey, Default, HasMany } from 'sequelize-typescript';
 import { ApiProperty } from '@nestjs/swagger';
+import { ClassTeacherAssignment } from '../../class-sections/entities/class-teacher-assignment.entity';
+import { TeacherAttendance } from './teacher-attendance.entity';
 
 @Table({
   tableName: 'teachers',
@@ -25,6 +27,12 @@ export class Teacher extends Model<Teacher> {
     allowNull: false,
   })
   phone: string;
+
+  @HasMany(() => ClassTeacherAssignment, 'teacherId')
+  classTeacherAssignments: ClassTeacherAssignment[];
+
+  @HasMany(() => TeacherAttendance, 'teacherId')
+  attendances: TeacherAttendance[];
 
   @Column
   createdAt: Date;
